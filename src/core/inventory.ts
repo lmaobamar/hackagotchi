@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { inventory } from "@/db/schema";
 import { sql } from "drizzle-orm";
 
-export async function addItemToInventory(
+async function addItemToInventory(
 	itemId: string,
 	quantity: number,
 ): Promise<void> {
@@ -20,3 +20,5 @@ export async function addItemToInventory(
 			},
 		});
 }
+
+export default { addItemToInventory };
