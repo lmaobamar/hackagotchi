@@ -31,8 +31,7 @@ export function getAppDataLocation() {
 			throw new Error("Unsupported platform!!");
 	}
 	if (!decidedPath) throw new Error("That's not supposed to happen");
-	if (!fs.existsSync(decidedPath)) {
+	if (!fs.existsSync(decidedPath))
 		fs.mkdirSync(decidedPath, { recursive: true });
-	}
 	return decidedPath;
 }
