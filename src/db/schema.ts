@@ -1,9 +1,29 @@
 // a good start...
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import {
+	sqliteTable,
+	primaryKey,
+	text,
+	integer,
+} from "drizzle-orm/sqlite-core";
+import type { InferSelectModel } from "drizzle-orm";
 import { sql } from "drizzle-orm";
+
+export const userProfile = sqliteTable("user_profile", {
+	id: integer("id").primaryKey().default(1),
+	secret: text("secret")
+		.notNull()
+		.$defaultFn(() => crypto.randomUUID()),
+	coins: integer("coins").notNull().default(0),
+	totalPetsRaised: integer("total_pets_raised").notNull().default(0),
+});
 
 export const pet = sqliteTable("pet", {
 	id: integer("id").primaryKey().default(1),
+	userId: integer("user_id")
+		.notNull()
+		.default(1)
+		.references(() => userProfile.id, { onDelete: "cascade" }),
+
 	name: text("name").notNull(),
 
 	// stats
@@ -15,7 +35,6 @@ export const pet = sqliteTable("pet", {
 	isAlive: integer("is_alive", { mode: "boolean" }).notNull().default(true),
 
 	// economy
-	coins: integer("coins").notNull().default(0),
 	streakCount: integer("streak_count").notNull().default(0),
 	lastStreakDate: text("last_streak_date"),
 
@@ -24,7 +43,19 @@ export const pet = sqliteTable("pet", {
 		.default(sql`(datetime('now'))`),
 });
 
-export const inventory = sqliteTable("inventory", {
-	itemId: text("item_id").primaryKey(),
-	quantity: integer("quantity").notNull(),
-});
+export const inventory = sqliteTable(
+	"inventory",
+	{
+		userId: integer("user_id")
+			.notNull()
+			.default(1)
+			.references(() => userProfile.id, { onDelete: "cascade" }),
+		itemId: text("item_id").notNull(),
+		quantity: integer("quantity").notNull(),
+	},
+	(table) => [primaryKey({ columns: [table.userId, table.itemId] })],
+);
+
+export type UserProfile = InferSelectModel<typeof userProfile>;
+export type Pet = InferSelectModel<typeof pet>;
+export type Inventory = InferSelectModel<typeof inventory>;
