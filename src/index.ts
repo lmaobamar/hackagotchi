@@ -1,6 +1,6 @@
-import { db, sqlite, runMigrations } from "@/db";
-import { sql } from "drizzle-orm";
+import { sqlite, runMigrations } from "@/db";
 import { initAppDatabase } from "@/db/init";
+import { startApp } from "@/app";
 
 function shutdownTemp() {
 	// console.log("shutdownTemp");
@@ -21,8 +21,4 @@ process.on("SIGTERM", () => {
 
 runMigrations();
 await initAppDatabase();
-
-// raw sql..
-// this is temporary. its sort of just a test to see if all my crap worked!
-const [version] = db.get<[string]>(sql`SELECT sqlite_version();`);
-console.log("sqlite ver:", version);
+await startApp();
