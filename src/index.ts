@@ -1,5 +1,6 @@
 import { db, sqlite, runMigrations } from "@/db";
 import { sql } from "drizzle-orm";
+import { initAppDatabase } from "./db/init";
 
 function shutdownTemp() {
 	// console.log("shutdownTemp");
@@ -19,6 +20,7 @@ process.on("SIGTERM", () => {
 });
 
 runMigrations();
+await initAppDatabase();
 
 // raw sql..
 // this is temporary. its sort of just a test to see if all my crap worked!
