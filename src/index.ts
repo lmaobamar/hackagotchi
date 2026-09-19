@@ -1,6 +1,6 @@
 import { db, sqlite, runMigrations } from "@/db";
 import { sql } from "drizzle-orm";
-import { initAppDatabase } from "./db/init";
+import { initAppDatabase } from "@/db/init";
 
 function shutdownTemp() {
 	// console.log("shutdownTemp");
