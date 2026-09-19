@@ -15,7 +15,7 @@ process.on("SIGINT", () => {
 });
 process.on("SIGTERM", () => {
 	shutdownTemp();
-	process.exit(1);
+	process.exit(0);
 });
 
 runMigrations();
