@@ -5,7 +5,7 @@ import {
 	text,
 	integer,
 } from "drizzle-orm/sqlite-core";
-import type { InferSelectModel } from "drizzle-orm";
+import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
 export const userProfile = sqliteTable("user_profile", {
@@ -57,5 +57,8 @@ export const inventory = sqliteTable(
 );
 
 export type UserProfile = InferSelectModel<typeof userProfile>;
+export type InsertUserProfile = InferInsertModel<typeof userProfile>;
 export type Pet = InferSelectModel<typeof pet>;
+export type InsertPet = InferInsertModel<typeof pet>;
 export type Inventory = InferSelectModel<typeof inventory>;
+export type InsertInventory = InferInsertModel<typeof inventory>;
