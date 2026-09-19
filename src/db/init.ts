@@ -23,3 +23,4 @@ export async function getAppInitState(): Promise<AppInitState> {
 export async function initAppDatabase(): Promise<void> {
 	await db.insert(userProfile).values({}).onConflictDoNothing();
 }
+

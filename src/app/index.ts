@@ -2,7 +2,9 @@ import {
 	BoxRenderable,
 	TextRenderable,
 	createCliRenderer,
-} from "@opentui/core";
+} 
+from "@opentui/core";
+import { createPet } from"../db/queries";	
 
 export async function startApp() {
 	const renderer = await createCliRenderer({
@@ -14,7 +16,7 @@ export async function startApp() {
 	const counter = new TextRenderable(renderer, {
 		id: "counter",
 		content: `Count ${count}`,
-		fg: "#FFFFFF",
+				fg: "#FFFFFF",
 	});
 
 	const panel = new BoxRenderable(renderer, {
@@ -35,7 +37,7 @@ export async function startApp() {
 	});
 
 	content.add(
-		new TextRenderable(renderer, { content: "test 123", fg: "#DCE3FF" }),
+		new TextRenderable(renderer, { content: "Create a Pet!", fg: "#DCE3FF" }),
 	);
 	content.add(counter);
 	content.add(
@@ -47,7 +49,7 @@ export async function startApp() {
 	panel.add(content);
 	renderer.root.add(panel);
 
-	renderer.keyInput.on("keypress", (key) => {
+	renderer.keyInput.on("keypress", async (key) => {
 		switch (key.name) {
 			case "q":
 				renderer.destroy();
@@ -62,6 +64,9 @@ export async function startApp() {
 			case "right":
 				count++;
 				counter.content = `Count ${count}`;
+				return;
+			case "c":
+			    await createPet("Orpheus Jr");
 				return;
 			default:
 				return;
