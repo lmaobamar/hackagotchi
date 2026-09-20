@@ -1,0 +1,1 @@
+ALTER TABLE `user_profile` ADD `last_launched_app` text;

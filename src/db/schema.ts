@@ -16,6 +16,7 @@ export const userProfile = sqliteTable("user_profile", {
 		.$defaultFn(() => crypto.randomUUID()),
 	coins: integer("coins").notNull().default(0),
 	totalPetsRaised: integer("total_pets_raised").notNull().default(0),
+	lastLaunchedApp: text("last_launched_app"),
 });
 
 export const pet = sqliteTable("pet", {

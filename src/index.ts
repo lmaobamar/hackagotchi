@@ -1,6 +1,7 @@
 import { startApp } from "@/app";
 import { runMigrations, sqlite } from "@/db";
-import { initAppDatabase } from "@/db/init";
+import { initAppDatabase, recordLastAppLaunch } from "@/db/init";
+import { processDecay } from "@/core/decay";
 
 function shutdownTemp() {
 	// console.log("shutdownTemp");
@@ -21,4 +22,6 @@ process.on("SIGTERM", () => {
 
 runMigrations();
 await initAppDatabase();
+await processDecay();
+await recordLastAppLaunch();
 await startApp();
