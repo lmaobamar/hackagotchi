@@ -3,20 +3,20 @@ import { runMigrations, sqlite } from "@/db";
 import { initAppDatabase, recordLastAppLaunch } from "@/db/init";
 import { processDecay } from "@/core/decay";
 
-function shutdownTemp() {
-	// console.log("shutdownTemp");
+function shutdown() {
+	// console.log("shutdown");
 	if (sqlite.filename) {
 		sqlite.close();
 	}
 }
 
-process.on("exit", shutdownTemp);
+process.on("exit", shutdown);
 process.on("SIGINT", () => {
-	shutdownTemp();
+	shutdown();
 	process.exit(0);
 });
 process.on("SIGTERM", () => {
-	shutdownTemp();
+	shutdown();
 	process.exit(0);
 });
 
