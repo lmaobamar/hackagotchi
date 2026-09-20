@@ -14,6 +14,11 @@ export interface PetSnapshot {
 	isAlive: boolean;
 }
 
+export interface BuyPromptSnapshot {
+	item: ShopEntry;
+	quantity: number;
+}
+
 export interface AppSnapshot {
 	coins: number;
 	pet: PetSnapshot | null;
@@ -21,12 +26,16 @@ export interface AppSnapshot {
 	page: AppPage;
 	selectedShopIndex: number;
 	feedback: string;
+	buyPrompt: BuyPromptSnapshot | null;
 }
 
 export interface AppViewActions {
 	navigate: (page: AppPage) => void;
 	selectShop: (index: number) => void;
-	purchaseSelected: () => void;
+	openBuyPrompt: () => void;
+	closeBuyPrompt: () => void;
+	changeBuyQuantity: (delta: number) => void;
+	confirmBuy: () => void;
 }
 
 export type ViewportMode = "tiny" | "compact" | "standard" | "wide";
@@ -77,6 +86,15 @@ export class AppView {
 	private readonly railArt: TextRenderable;
 	private readonly hints: TextRenderable;
 	private readonly feedback: TextRenderable;
+	private readonly promptOverlay: BoxRenderable;
+	private readonly promptBox: BoxRenderable;
+	private readonly promptTitle: TextRenderable;
+	private readonly promptItemInfo: TextRenderable;
+	private readonly promptQty: TextRenderable;
+	private readonly promptTotal: TextRenderable;
+	private readonly promptButtons: BoxRenderable;
+	private readonly promptConfirmBtn: TextRenderable;
+	private readonly promptCancelBtn: TextRenderable;
 	private snapshot: AppSnapshot;
 
 	constructor(
@@ -292,7 +310,7 @@ export class AppView {
 					selected.stock > 0 &&
 					this.snapshot.coins >= selected.item.price
 				) {
-					this.actions.purchaseSelected();
+					this.actions.openBuyPrompt();
 				}
 			},
 		});
@@ -332,7 +350,73 @@ export class AppView {
 		this.shell.add(header);
 		this.shell.add(body);
 		this.shell.add(footer);
+
+		this.promptOverlay = new BoxRenderable(renderer, {
+			width: "100%",
+			height: "100%",
+			position: "absolute",
+			top: 0,
+			left: 0,
+			zIndex: 10,
+			alignItems: "center",
+			justifyContent: "center",
+		});
+		this.promptBox = new BoxRenderable(renderer, {
+			width: 44,
+			padding: 1,
+			backgroundColor: theme.chrome,
+			border: ["top", "right", "bottom", "left"],
+			borderColor: theme.accent,
+			flexDirection: "column",
+			gap: 1,
+		});
+		this.promptTitle = new TextRenderable(renderer, {
+			content: "Confirm Purchase",
+			fg: theme.accent,
+			selectable: false,
+		});
+		this.promptItemInfo = new TextRenderable(renderer, {
+			content: "",
+			fg: theme.fg,
+			selectable: false,
+		});
+		this.promptQty = new TextRenderable(renderer, {
+			content: "",
+			fg: theme.yellow,
+			selectable: false,
+		});
+		this.promptTotal = new TextRenderable(renderer, {
+			content: "",
+			fg: theme.cyan,
+			selectable: false,
+		});
+		this.promptButtons = new BoxRenderable(renderer, {
+			flexDirection: "row",
+			justifyContent: "space-between",
+		});
+		this.promptConfirmBtn = new TextRenderable(renderer, {
+			content: "[ Enter ] Confirm",
+			fg: theme.green,
+			selectable: false,
+			onMouseDown: () => this.actions.confirmBuy(),
+		});
+		this.promptCancelBtn = new TextRenderable(renderer, {
+			content: "[ Esc ] Cancel",
+			fg: theme.muted,
+			selectable: false,
+			onMouseDown: () => this.actions.closeBuyPrompt(),
+		});
+		this.promptButtons.add(this.promptConfirmBtn);
+		this.promptButtons.add(this.promptCancelBtn);
+		this.promptBox.add(this.promptTitle);
+		this.promptBox.add(this.promptItemInfo);
+		this.promptBox.add(this.promptQty);
+		this.promptBox.add(this.promptTotal);
+		this.promptBox.add(this.promptButtons);
+		this.promptOverlay.add(this.promptBox);
+
 		renderer.root.add(this.shell);
+		renderer.root.add(this.promptOverlay);
 		renderer.root.add(this.tooSmall);
 		renderer.root.onSizeChange = () => this.update(this.snapshot);
 		this.update(snapshot);
@@ -386,8 +470,8 @@ export class AppView {
 			if (!entry) continue;
 			const selected = index === snapshot.selectedShopIndex;
 			row.content = compact
-				? `${selected ? "›" : " "} ${index + 1}. ${entry.item.name} · ${entry.item.price} coins`
-				: `${selected ? "›" : " "} ${index + 1}. ${entry.item.name}  ${entry.item.price} coins\n    ${entry.item.description}`;
+				? `${selected ? "›" : " "} ${index + 1}. ${entry.item.name} · ${entry.item.price}c (${entry.stock} left)`
+				: `${selected ? "›" : " "} ${index + 1}. ${entry.item.name}  ${entry.item.price} coins  [${entry.stock} in stock]\n    ${entry.item.description}`;
 			row.bg = selected ? theme.selected : theme.bg;
 			row.fg = selected ? theme.accent : theme.fg;
 		}
@@ -404,7 +488,10 @@ export class AppView {
 			: canAfford
 				? theme.green
 				: theme.yellow;
-		this.shopKeeperArt.content = orpheusArt.confused;
+		const h = this.renderer.root.height;
+		const maxLines = Math.max(6, h - 14);
+		const artLines = orpheusArt.confused.split("\n");
+		this.shopKeeperArt.content = artLines.slice(0, maxLines).join("\n");
 		this.shopKeeperArea.visible = snapshot.page === "shop";
 		if (snapshot.page === "home") {
 			this.railTitle.content = "Habitat";
@@ -445,14 +532,25 @@ export class AppView {
 			snapshot.feedback.startsWith("Not enough")
 				? theme.red
 				: theme.green;
-		this.hints.content =
-			snapshot.page === "shop"
-				? compact
-					? "↑↓ Select  Enter Buy  Esc Home  q Quit"
-					: "↑↓ / j k Select  Enter Buy  1-3 Pick  Esc Home  q Quit"
-				: pet
-					? "h Home  s Shop  q Quit"
-					: "c Create  s Shop  q Quit";
+		if (snapshot.buyPrompt) {
+			const prompt = snapshot.buyPrompt;
+			const total = prompt.item.item.price * prompt.quantity;
+			this.promptOverlay.visible = true;
+			this.promptItemInfo.content = `${prompt.item.item.name}\n${prompt.item.item.price} coins each · ${prompt.item.stock} in stock`;
+			this.promptQty.content = `Quantity: [ - ] ${prompt.quantity} [ + ] (← / → to adjust)`;
+			this.promptTotal.content = `Total: ${total} coins (Balance: ${snapshot.coins} coins)`;
+			this.hints.content = "← / - Decrease  → / + Increase  Enter Confirm  Esc Cancel";
+		} else {
+			this.promptOverlay.visible = false;
+			this.hints.content =
+				snapshot.page === "shop"
+					? compact
+						? "↑↓ Select  Enter Buy  Esc Home  q Quit"
+						: "↑↓ / j k Select  Enter Buy  1-3 Pick  Esc Home  q Quit"
+					: pet
+						? "h Home  s Shop  q Quit"
+						: "c Create  s Shop  q Quit";
+		}
 		this.applyViewport();
 	}
 

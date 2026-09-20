@@ -27,6 +27,7 @@ export async function startApp() {
 		page: "home",
 		selectedShopIndex: 0,
 		feedback: "",
+		buyPrompt: null,
 	};
 
 	const render = () => {
@@ -34,7 +35,9 @@ export async function startApp() {
 	};
 	const reload = async () => {
 		const state = await getAppInitState();
-		const shop = state.user ? shopModule.getDailyShop(state.user.secret) : [];
+		const shop = state.user
+			? shopModule.getDailyShop(state.user.secret, state.user.id)
+			: [];
 		snapshot = {
 			...snapshot,
 			coins: state.user?.coins ?? 0,
@@ -61,23 +64,65 @@ export async function startApp() {
 		snapshot = { ...snapshot, selectedShopIndex: index, feedback: "Ready" };
 		render();
 	};
+	const openBuyPrompt = () => {
+		const entry = snapshot.shop[snapshot.selectedShopIndex];
+		if (!entry || entry.stock <= 0) return;
+		snapshot = {
+			...snapshot,
+			buyPrompt: {
+				item: entry,
+				quantity: 1,
+			},
+		};
+		render();
+	};
+	const closeBuyPrompt = () => {
+		snapshot = { ...snapshot, buyPrompt: null };
+		render();
+	};
+	const changeBuyQuantity = (delta: number) => {
+		if (!snapshot.buyPrompt) return;
+		const maxQty = Math.max(
+			1,
+			Math.min(
+				snapshot.buyPrompt.item.stock,
+				Math.floor(snapshot.coins / snapshot.buyPrompt.item.item.price) || 1,
+			),
+		);
+		const newQty = Math.max(1, Math.min(maxQty, snapshot.buyPrompt.quantity + delta));
+		snapshot = {
+			...snapshot,
+			buyPrompt: {
+				...snapshot.buyPrompt,
+				quantity: newQty,
+			},
+		};
+		render();
+	};
 	const purchase = async () => {
 		if (busy || disposed) return;
+		if (!snapshot.buyPrompt) return;
 		busy = true;
 		try {
 			const state = await getAppInitState();
-			const entry = snapshot.shop[snapshot.selectedShopIndex];
-			if (!state.user || !entry) {
+			const prompt = snapshot.buyPrompt;
+			if (!state.user || !prompt) {
 				fail("Unable to load that item.");
 				return;
 			}
-			await transactions.buyItem(state.user, entry.item.id, 1);
+			await transactions.buyItem(
+				state.user,
+				prompt.item.item.id,
+				prompt.quantity,
+			);
 			snapshot = {
 				...snapshot,
-				feedback: `${entry.item.name} added to inventory.`,
+				buyPrompt: null,
+				feedback: `${prompt.quantity}x ${prompt.item.item.name} added to inventory.`,
 			};
 			await reload();
 		} catch (error) {
+			snapshot = { ...snapshot, buyPrompt: null };
 			fail(
 				error instanceof InsufficientFundsError
 					? "Not enough coins for that item."
@@ -116,6 +161,16 @@ export async function startApp() {
 				renderer.console.toggle();
 				return;
 			}
+			if (snapshot.buyPrompt) {
+				if (key.name === "escape") return closeBuyPrompt();
+				if (key.name === "left" || key.name === "-")
+					return changeBuyQuantity(-1);
+				if (key.name === "right" || key.name === "+" || key.name === "=")
+					return changeBuyQuantity(1);
+				if (key.name === "return" || key.name === "enter")
+					return await purchase();
+				return;
+			}
 			if (key.name === "h" || key.name === "escape") return navigate("home");
 			if (key.name === "s") return navigate("shop");
 			if (key.name === "c") return await createPet();
@@ -128,7 +183,7 @@ export async function startApp() {
 				);
 			if (key.name === "1" || key.name === "2" || key.name === "3")
 				return selectShop(Number(key.name) - 1);
-			if (key.name === "return" || key.name === "enter") await purchase();
+			if (key.name === "return" || key.name === "enter") return openBuyPrompt();
 		} catch {
 			fail("Unable to update Hackagotchi right now.");
 		}
@@ -150,7 +205,10 @@ export async function startApp() {
 			{
 				navigate,
 				selectShop,
-				purchaseSelected: () => {
+				openBuyPrompt,
+				closeBuyPrompt,
+				changeBuyQuantity,
+				confirmBuy: () => {
 					void purchase().catch(() =>
 						fail("Unable to complete that purchase."),
 					);
