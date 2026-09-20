@@ -4,7 +4,7 @@ import {
 	type KeyEvent,
 } from "@opentui/core";
 import petModule from "@/core/pet";
-import shopModule from "@/core/shop";
+import { getDailyShop } from "@/core/shop";
 import transactions from "@/core/transactions";
 import { InsufficientFundsError } from "@/db/errors";
 import { getAppInitState } from "@/db/init";
@@ -34,7 +34,7 @@ export async function startApp() {
 	};
 	const reload = async () => {
 		const state = await getAppInitState();
-		const shop = state.user ? shopModule.getDailyShop(state.user.secret) : [];
+		const shop = state.user ? getDailyShop(state.user.secret) : [];
 		snapshot = {
 			...snapshot,
 			coins: state.user?.coins ?? 0,
