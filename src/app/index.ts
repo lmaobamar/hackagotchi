@@ -1,130 +1,164 @@
 import {
-	BoxRenderable,
+	CliRenderEvents,
 	createCliRenderer,
-	TextRenderable,
+	type KeyEvent,
 } from "@opentui/core";
 import petModule from "@/core/pet";
-import { getAppInitState } from "@/db/init";
 import shopModule from "@/core/shop";
-import balanceModule from "@/core/balance";
-import invModule from "@/core/inventory";
-import { InsufficientFundsError } from "@/db/errors";
 import transactions from "@/core/transactions";
+import { InsufficientFundsError } from "@/db/errors";
+import { getAppInitState } from "@/db/init";
+import { AppView, type AppPage, type AppSnapshot } from "./view";
+import { theme } from "./theme";
 
 export async function startApp() {
 	const renderer = await createCliRenderer({
 		exitOnCtrlC: true,
-		backgroundColor: "#1131E9",
+		backgroundColor: theme.bg,
 	});
+	let disposed = false;
+	let busy = false;
+	let view: AppView | null = null;
+	let snapshot: AppSnapshot = {
+		coins: 0,
+		pet: null,
+		shop: [],
+		page: "home",
+		selectedShopIndex: 0,
+		feedback: "",
+	};
 
-	let currentShop: ReturnType<typeof shopModule.getDailyShop> = [];
-
-	const { pet, user } = await getAppInitState();
-
-	if (pet) {
-		await petModule.updateStreak(pet.userId);
-	}
-
-	const panel = new BoxRenderable(renderer, {
-		width: 47,
-		height: 15,
-		backgroundColor: "#1131E9",
-		alignItems: "center",
-		justifyContent: "center",
-	});
-
-	const content = new BoxRenderable(renderer, {
-		width: 40,
-		height: 13,
-		backgroundColor: "#2947F0",
-		padding: 1,
-		flexDirection: "column",
-		gap: 1,
-		alignItems: "center",
-	});
-
-	const title = new TextRenderable(renderer, {
-		content: pet ? pet.name : "No pet yet!",
-		fg: "#DCE3FF",
-	});
-
-	const stats = new TextRenderable(renderer, {
-		content: pet
-			? `Hunger ${pet.hunger} | Happiness ${pet.happiness} | Energy ${pet.energy} | Streak ${pet.streakCount}`
-			: "Press c to create your pet",
-		fg: "#AEBBFF",
-	});
-
-	const instructions = new TextRenderable(renderer, {
-		content: pet ? "s shop - q quit" : "c create - s shop - q quit",
-		fg: "#AEBBFF",
-	});
-
-	const shopDisplay = new TextRenderable(renderer, {
-		content: "",
-		fg: "#DCE3FF",
-	});
-
-	content.add(title);
-	content.add(stats);
-	content.add(instructions);
-	content.add(shopDisplay);
-	panel.add(content);
-	renderer.root.add(panel);
-
-	renderer.keyInput.on("keypress", async (key) => {
-		switch (key.name) {
-			case "q":
+	const render = () => {
+		if (!disposed) view?.update(snapshot);
+	};
+	const reload = async () => {
+		const state = await getAppInitState();
+		const shop = state.user ? shopModule.getDailyShop(state.user.secret) : [];
+		snapshot = {
+			...snapshot,
+			coins: state.user?.coins ?? 0,
+			pet: state.pet,
+			shop,
+			selectedShopIndex: Math.max(
+				0,
+				Math.min(snapshot.selectedShopIndex, Math.max(0, shop.length - 1)),
+			),
+		};
+		render();
+		return state;
+	};
+	const fail = (message: string) => {
+		snapshot = { ...snapshot, feedback: message };
+		render();
+	};
+	const navigate = (page: AppPage) => {
+		snapshot = { ...snapshot, page, feedback: "Ready" };
+		render();
+	};
+	const selectShop = (index: number) => {
+		if (!snapshot.shop[index]) return;
+		snapshot = { ...snapshot, selectedShopIndex: index, feedback: "Ready" };
+		render();
+	};
+	const purchase = async () => {
+		if (busy || disposed) return;
+		busy = true;
+		try {
+			const state = await getAppInitState();
+			const entry = snapshot.shop[snapshot.selectedShopIndex];
+			if (!state.user || !entry) {
+				fail("Unable to load that item.");
+				return;
+			}
+			await transactions.buyItem(state.user, entry.item.id, 1);
+			snapshot = {
+				...snapshot,
+				feedback: `${entry.item.name} added to inventory.`,
+			};
+			await reload();
+		} catch (error) {
+			fail(
+				error instanceof InsufficientFundsError
+					? "Not enough coins for that item."
+					: "Unable to complete that purchase.",
+			);
+		} finally {
+			busy = false;
+		}
+	};
+	const createPet = async () => {
+		if (busy || disposed || snapshot.pet) return;
+		busy = true;
+		try {
+			await petModule.createPet("Orpheus Jr");
+			snapshot = {
+				...snapshot,
+				feedback: "Orpheus Jr has moved into the habitat.",
+			};
+			await reload();
+		} catch {
+			fail("Unable to create a pet right now.");
+		} finally {
+			busy = false;
+		}
+	};
+	const handleKey = async (key: KeyEvent) => {
+		try {
+			if (key.name === "q") {
 				renderer.destroy();
 				return;
-			case "c":
-				if (!pet) {
-					await petModule.createPet("Orpheus Jr");
-					title.content = "Orpheus Jr";
-					stats.content = " Hunger 100 | Happiness 50 | Energy 30";
-					instructions.content = "s shop - q quit";
-				}
+			}
+			if (key.name === "\\" && process.env.NODE_ENV !== "production") {
+				renderer.console.toggle();
 				return;
-			case "s":
-				if (user) {
-					currentShop = shopModule.getDailyShop(user.secret);
-					shopDisplay.content = currentShop
-						.map(
-							(entry, i) =>
-								`${i + 1}. ${entry.item.name} : ${entry.item.price}c (${entry.stock} in stock)`,
-						)
-						.join("\n");
-				}
-				return;
-			case "t":
-				if (user) transactions.buyItem(user, "streak_reviver", 1);
-				return;
-			case "\\":
-				if (process.env.NODE_ENV !== "production") {
-					renderer.console.toggle();
-				}
-				return;
-			case "1":
-			case "2":
-			case "3":
-				const index = Number(key.name) - 1;
-				const entry = currentShop[index];
-				if (entry && user) {
-					try {
-						balanceModule.debitCoinsSync(entry.item.price, user.id);
-						invModule.addItemToInventory(entry.item.id, 1);
-						shopDisplay.content = `Bought ${entry.item.name}!`;
-					} catch (e) {
-						if (e instanceof InsufficientFundsError) {
-							shopDisplay.content = "Not enough coins!";
-						} else {
-							shopDisplay.content = "Something went wrong";
-						}
-					}
-				}
-				return;
-			default:
-				return;
+			}
+			if (key.name === "h" || key.name === "escape") return navigate("home");
+			if (key.name === "s") return navigate("shop");
+			if (key.name === "c") return await createPet();
+			if (snapshot.page !== "shop") return;
+			if (key.name === "up" || key.name === "k")
+				return selectShop(Math.max(0, snapshot.selectedShopIndex - 1));
+			if (key.name === "down" || key.name === "j")
+				return selectShop(
+					Math.min(snapshot.shop.length - 1, snapshot.selectedShopIndex + 1),
+				);
+			if (key.name === "1" || key.name === "2" || key.name === "3")
+				return selectShop(Number(key.name) - 1);
+			if (key.name === "return" || key.name === "enter") await purchase();
+		} catch {
+			fail("Unable to update Hackagotchi right now.");
 		}
-	});
+	};
+	const dispose = () => {
+		if (disposed) return;
+		disposed = true;
+		renderer.keyInput.off("keypress", handleKey);
+		view?.destroy();
+		view = null;
+	};
+
+	try {
+		const initial = await getAppInitState();
+		if (initial.pet) await petModule.updateStreak(initial.pet.userId);
+		await reload();
+		view = new AppView(
+			renderer,
+			{
+				navigate,
+				selectShop,
+				purchaseSelected: () => {
+					void purchase().catch(() =>
+						fail("Unable to complete that purchase."),
+					);
+				},
+			},
+			snapshot,
+		);
+		renderer.keyInput.on("keypress", handleKey);
+		renderer.once(CliRenderEvents.DESTROY, dispose);
+	} catch (error) {
+		dispose();
+		renderer.destroy();
+		throw error;
+	}
 }
