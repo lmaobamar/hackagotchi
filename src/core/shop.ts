@@ -6,7 +6,7 @@ export interface ShopEntry {
 	stock: number;
 }
 
-export function getDailyShop(userSecret: string): ShopEntry[] {
+function getDailyShop(userSecret: string): ShopEntry[] {
 	const rand = createPRNG(getEpochDay(), userSecret);
 
 	const shuffled = [...ITEMS];
@@ -22,3 +22,5 @@ export function getDailyShop(userSecret: string): ShopEntry[] {
 		stock: Math.floor(rand() * 5) + 1,
 	}));
 }
+
+export default { getDailyShop };
