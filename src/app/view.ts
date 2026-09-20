@@ -539,7 +539,8 @@ export class AppView {
 			this.promptItemInfo.content = `${prompt.item.item.name}\n${prompt.item.item.price} coins each · ${prompt.item.stock} in stock`;
 			this.promptQty.content = `Quantity: [ - ] ${prompt.quantity} [ + ] (← / → to adjust)`;
 			this.promptTotal.content = `Total: ${total} coins (Balance: ${snapshot.coins} coins)`;
-			this.hints.content = "← / - Decrease  → / + Increase  Enter Confirm  Esc Cancel";
+			this.hints.content =
+				"← / - Decrease  → / + Increase  Enter Confirm  Esc Cancel";
 		} else {
 			this.promptOverlay.visible = false;
 			this.hints.content =

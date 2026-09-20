@@ -89,7 +89,10 @@ export async function startApp() {
 				Math.floor(snapshot.coins / snapshot.buyPrompt.item.item.price) || 1,
 			),
 		);
-		const newQty = Math.max(1, Math.min(maxQty, snapshot.buyPrompt.quantity + delta));
+		const newQty = Math.max(
+			1,
+			Math.min(maxQty, snapshot.buyPrompt.quantity + delta),
+		);
 		snapshot = {
 			...snapshot,
 			buyPrompt: {

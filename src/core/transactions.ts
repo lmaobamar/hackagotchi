@@ -4,7 +4,11 @@ import inventory from "./inventory";
 import shop from "./shop";
 import { InvalidItemIdInternalError, OutOfStockError } from "@/db/errors";
 
-async function buyItem(user: UserProfile, itemId: string, quantity: number): Promise<void> {
+async function buyItem(
+	user: UserProfile,
+	itemId: string,
+	quantity: number,
+): Promise<void> {
 	if (quantity <= 0) return;
 	const currentShop = shop.getDailyShop(user.secret, user.id);
 	const targetEntry = currentShop.find((entry) => entry.item.id === itemId);
