@@ -6,12 +6,16 @@ import {
 import petModule from "../core/pet";
 import { getAppInitState } from "../db/init";
 import { getDailyShop } from "../core/shop";
+import balance from "../db/balance";
+import invModule from "../core/inventory";
 
 export async function startApp() {
 	const renderer = await createCliRenderer({
 		exitOnCtrlC: true,
 		backgroundColor: "#1131E9",
 	});
+
+	let currentShop : ReturnType<typeof getDailyShop> = [];
 
 	const { pet, user } = await getAppInitState();
 
@@ -77,12 +81,28 @@ export async function startApp() {
 				return;
 			case "s":
 				if (user)	{
-					const shop = getDailyShop (user.secret);
-					shopDisplay.content = shop
-					    .map((entry) => `${entry.item.name} (${entry.stock}) -${entry.item.price}c`)
+					currentShop = getDailyShop (user.secret);
+					shopDisplay.content = currentShop
+					    .map((entry, i) => `${i +1}. ${entry.item.name} - ${entry.stock} -${entry.item.price}c(${entry.stock} in stock)`)
 						.join("\n");
 				}
 				return;
+			case "1":
+			case "2":
+			case "3": {
+				const index = Number(key.name) - 1;
+				const entry = currentShop[index];
+				if (entry && user) {
+					try {
+						balance.debitCoinsSync(entry.item.price, user.id);
+						invModule.addItemToInventory(entry.item.id, 1);
+						shopDisplay.content = `Bought ${entry.item.name}!`;
+					} catch {
+						shopDisplay.content = "Not enough coins!";
+					}
+				}
+				return;
+			}	
 			default:
 				return;
 		}
