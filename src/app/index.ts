@@ -97,7 +97,7 @@ export async function startApp() {
 				}
 				return;
 			case "t":
-				if (user) transactions.buyItem(user, 1, 1);
+				if (user) transactions.buyItem(user, "streak_reviver", 1);
 				return;
 			case "\\":
 				if (process.env.NODE_ENV !== "production") {
