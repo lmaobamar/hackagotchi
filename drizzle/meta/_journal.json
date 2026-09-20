@@ -15,6 +15,13 @@
       "when": 1789929723709,
       "tag": "0001_mysterious_tempest",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789937160113,
+      "tag": "0002_curious_slipstream",
+      "breakpoints": true
     }
   ]
 }

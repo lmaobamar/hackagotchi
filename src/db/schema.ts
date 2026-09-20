@@ -58,9 +58,29 @@ export const inventory = sqliteTable(
 	(table) => [primaryKey({ columns: [table.userId, table.itemId] })],
 );
 
+export const shopPurchases = sqliteTable(
+	"shop_purchases",
+	{
+		userId: integer("user_id")
+			.notNull()
+			.default(1)
+			.references(() => userProfile.id, { onDelete: "cascade" }),
+		epochDay: integer("epoch_day").notNull(),
+		itemId: text("item_id").notNull(),
+		quantity: integer("quantity").notNull().default(0),
+	},
+	(table) => [
+		primaryKey({
+			columns: [table.userId, table.epochDay, table.itemId],
+		}),
+	],
+);
+
 export type UserProfile = InferSelectModel<typeof userProfile>;
 export type InsertUserProfile = InferInsertModel<typeof userProfile>;
 export type Pet = InferSelectModel<typeof pet>;
 export type InsertPet = InferInsertModel<typeof pet>;
 export type Inventory = InferSelectModel<typeof inventory>;
 export type InsertInventory = InferInsertModel<typeof inventory>;
+export type ShopPurchase = InferSelectModel<typeof shopPurchases>;
+export type InsertShopPurchase = InferInsertModel<typeof shopPurchases>;
