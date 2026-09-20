@@ -426,8 +426,8 @@ export class AppView {
 		this.snapshot = snapshot;
 		const pet = snapshot.pet;
 		this.balance.content = `◈ ${snapshot.coins} coins  ·  ◇ ${pet?.streakCount ?? 0} day streak`;
-		this.homeNav.content = `${snapshot.page === "home" ? "›" : " "} Home`;
-		this.shopNav.content = `${snapshot.page === "shop" ? "›" : " "} Shop`;
+		this.homeNav.content = `${snapshot.page === "home" ? ">" : " "} Home`;
+		this.shopNav.content = `${snapshot.page === "shop" ? ">" : " "} Shop`;
 		this.homeNav.bg = snapshot.page === "home" ? theme.selected : theme.chrome;
 		this.shopNav.bg = snapshot.page === "shop" ? theme.selected : theme.chrome;
 		this.heading.content = snapshot.page === "home" ? "Home" : "Orpheus' Shop";
@@ -460,9 +460,9 @@ export class AppView {
 			this.petName.content = "An empty habitat";
 			this.condition.content = "Press c to hatch your companion.";
 			this.condition.fg = theme.yellow;
-			this.statRows[0]!.content = "Hunger     —";
-			this.statRows[1]!.content = "Joy        —";
-			this.statRows[2]!.content = "Energy     —";
+			this.statRows[0]!.content = "Hunger     -";
+			this.statRows[1]!.content = "Joy        -";
+			this.statRows[2]!.content = "Energy     -";
 		}
 		for (const [index, row] of this.shopRows.entries()) {
 			const entry = snapshot.shop[index];
@@ -470,8 +470,8 @@ export class AppView {
 			if (!entry) continue;
 			const selected = index === snapshot.selectedShopIndex;
 			row.content = compact
-				? `${selected ? "›" : " "} ${index + 1}. ${entry.item.name} · ${entry.item.price}c (${entry.stock} left)`
-				: `${selected ? "›" : " "} ${index + 1}. ${entry.item.name}  ${entry.item.price} coins  [${entry.stock} in stock]\n    ${entry.item.description}`;
+				? `${selected ? ">" : " "} ${index + 1}. ${entry.item.name} · ${entry.item.price}c (${entry.stock} left)`
+				: `${selected ? ">" : " "} ${index + 1}. ${entry.item.name}  ${entry.item.price} coins  [${entry.stock} in stock]\n    ${entry.item.description}`;
 			row.bg = selected ? theme.selected : theme.bg;
 			row.fg = selected ? theme.accent : theme.fg;
 		}
