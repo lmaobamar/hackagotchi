@@ -4,12 +4,13 @@ import {
 	TextRenderable,
 } from "@opentui/core";
 import petModule from "@/core/pet";
-import { getAppInitState } from "@/db/init";
-import shopModule from "@/core/shop";
+import { getCurrentUser } from "@/db/user";
+import { getDailyShop } from "@/core/shop";
 import balanceModule from "@/core/balance";
 import invModule from "@/core/inventory";
 import { InsufficientFundsError } from "@/db/errors";
 import transactions from "@/core/transactions";
+import { getAppInitState } from "@/db/init";
 
 export async function startApp() {
 	const renderer = await createCliRenderer({
@@ -17,9 +18,10 @@ export async function startApp() {
 		backgroundColor: "#1131E9",
 	});
 
-	let currentShop: ReturnType<typeof shopModule.getDailyShop> = [];
+	let currentShop: ReturnType<typeof getDailyShop> = [];
 
-	const { pet, user } = await getAppInitState();
+	const { pet } = await getAppInitState();
+	const user = await getCurrentUser();
 
 	if (pet) {
 		await petModule.updateStreak(pet.userId);
@@ -87,7 +89,7 @@ export async function startApp() {
 				return;
 			case "s":
 				if (user) {
-					currentShop = shopModule.getDailyShop(user.secret);
+					currentShop = getDailyShop(user.secret);
 					shopDisplay.content = currentShop
 						.map(
 							(entry, i) =>
@@ -106,7 +108,7 @@ export async function startApp() {
 				return;
 			case "1":
 			case "2":
-			case "3":
+			case "3": {
 				const index = Number(key.name) - 1;
 				const entry = currentShop[index];
 				if (entry && user) {
@@ -123,6 +125,7 @@ export async function startApp() {
 					}
 				}
 				return;
+			}
 			default:
 				return;
 		}
