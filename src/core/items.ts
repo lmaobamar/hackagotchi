@@ -43,7 +43,7 @@ export const ITEMS: Item[] = [
 	{
 		id: "debug_spray",
 		name: "Debug Spray",
-		description: "removes a negetive status effect",
+		description: "removes a negative status effect",
 		price: 30,
 	},
 	{
