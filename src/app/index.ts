@@ -5,6 +5,7 @@ import {
 } from "@opentui/core";
 import petModule from "../core/pet";
 import { getAppInitState } from "../db/init";
+import { getDailyShop } from "../core/shop";
 
 export async function startApp() {
 	const renderer = await createCliRenderer({
@@ -12,19 +13,19 @@ export async function startApp() {
 		backgroundColor: "#1131E9",
 	});
 
-	const { pet } = await getAppInitState();
+	const { pet, user } = await getAppInitState();
 
 	const panel = new BoxRenderable(renderer, {
-		width: 42,
-		height: 9,
+		width: 47,
+		height: 15,
 		backgroundColor: "#1131E9",
 		alignItems: "center",
 		justifyContent: "center",
 	});
 
 	const content = new BoxRenderable(renderer, {
-		width: 38,
-		height: 7,
+		width: 40,
+		height: 13,
 		backgroundColor: "#2947F0",
 		padding: 1,
 		flexDirection: "column",
@@ -45,13 +46,19 @@ export async function startApp() {
 	});
 
 	const instructions = new TextRenderable(renderer, {
-		content: pet ? "q quit" : "c create | q quit",
+		content: pet ? "s shop - q quit" : "c create - s shop - q quit",
 		fg: "#AEBBFF",
+	});
+
+	const shopDisplay = new TextRenderable(renderer, {
+		content:"",
+		fg: "#DCE3FF"
 	});
 
 	content.add(title);
 	content.add(stats);
 	content.add(instructions);
+	content.add(shopDisplay);
 	panel.add(content);
 	renderer.root.add(panel);
 
@@ -65,7 +72,15 @@ export async function startApp() {
 					await petModule.createPet("Orpheus Jr");
 					title.content = "Orpheus Jr";
 					stats.content = " Hunger 100 | Happiness 50 | Energy 30";
-					instructions.content = "q quit";
+					instructions.content = "s shop - q quit";
+				}
+				return;
+			case "s":
+				if (user)	{
+					const shop = getDailyShop (user.secret);
+					shopDisplay.content = shop
+					    .map((entry) => `${entry.item.name} (${entry.stock}) -${entry.item.price}c`)
+						.join("\n");
 				}
 				return;
 			default:
