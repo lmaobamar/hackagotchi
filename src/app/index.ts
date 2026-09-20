@@ -19,6 +19,10 @@ export async function startApp() {
 
 	const { pet, user } = await getAppInitState();
 
+	if (pet) {
+		await petModule.updateStreak(pet.userId);
+	}
+
 	const panel = new BoxRenderable(renderer, {
 		width: 47,
 		height: 15,
@@ -44,7 +48,7 @@ export async function startApp() {
 
 	const stats = new TextRenderable(renderer, {
 		content: pet
-			? `Hunger ${pet.hunger} | Happiness ${pet.happiness} | Energy ${pet.energy}`
+			? `Hunger ${pet.hunger} | Happiness ${pet.happiness} | Energy ${pet.energy} | Streak ${pet.streakCount}`
 			: "Press c to create your pet",
 		fg: "#AEBBFF",
 	});
@@ -83,7 +87,7 @@ export async function startApp() {
 				if (user)	{
 					currentShop = getDailyShop (user.secret);
 					shopDisplay.content = currentShop
-					    .map((entry, i) => `${i +1}. ${entry.item.name} - ${entry.stock} -${entry.item.price}c(${entry.stock} in stock)`)
+					    .map((entry, i) => `${i +1}. ${entry.item.name} : ${entry.item.price}c (${entry.stock} in stock)`)
 						.join("\n");
 				}
 				return;
