@@ -1,7 +1,7 @@
 import { and, eq, gte, sql } from "drizzle-orm";
-import { db } from ".";
-import { InsufficientFundsError, UserNotFoundInternalError } from "./errors";
-import { userProfile } from "./schema";
+import { db } from "@/db";
+import { InsufficientFundsError, UserNotFoundInternalError } from "@/db/errors";
+import { userProfile } from "@/db/schema";
 
 function creditCoinsSync(amount: number, userId: number = 1): void {
 	if (amount <= 0) return;

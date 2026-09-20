@@ -11,3 +11,17 @@ export class UserNotFoundInternalError extends Error {
 		this.name = "UserNotFoundInternalError";
 	}
 }
+
+export class InvalidItemIdInternalError extends Error {
+	constructor(message = "Invalid Item Id") {
+		super(message);
+		this.name = "InvalidItemIdInternalError";
+	}
+}
+
+export class OutOfStockError extends Error {
+	constructor(message = "Item not in stock.") {
+		super(message);
+		this.name = "OutOfStockError";
+	}
+}

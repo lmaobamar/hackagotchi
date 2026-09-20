@@ -1,4 +1,4 @@
-import { createPRNG, getEpochDay } from "../helpers/prng";
+import { createPRNG, getEpochDay } from "@/helpers/prng";
 import { ITEMS, type Item } from "./items";
 
 export interface ShopEntry {

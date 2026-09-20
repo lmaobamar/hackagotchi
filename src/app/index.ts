@@ -6,8 +6,10 @@ import {
 import petModule from "@/core/pet";
 import { getAppInitState } from "@/db/init";
 import shopModule from "@/core/shop";
-import balanceModule from "@/db/balance";
+import balanceModule from "@/core/balance";
 import invModule from "@/core/inventory";
+import { InsufficientFundsError } from "@/db/errors";
+import transactions from "@/core/transactions";
 
 export async function startApp() {
 	const renderer = await createCliRenderer({
@@ -94,9 +96,17 @@ export async function startApp() {
 						.join("\n");
 				}
 				return;
+			case "t":
+				if (user) transactions.buyItem(user, 1, 1);
+				return;
+			case "\\":
+				if (process.env.NODE_ENV !== "production") {
+					renderer.console.toggle();
+				}
+				return;
 			case "1":
 			case "2":
-			case "3": {
+			case "3":
 				const index = Number(key.name) - 1;
 				const entry = currentShop[index];
 				if (entry && user) {
@@ -104,12 +114,15 @@ export async function startApp() {
 						balanceModule.debitCoinsSync(entry.item.price, user.id);
 						invModule.addItemToInventory(entry.item.id, 1);
 						shopDisplay.content = `Bought ${entry.item.name}!`;
-					} catch {
-						shopDisplay.content = "Not enough coins!";
+					} catch (e) {
+						if (e instanceof InsufficientFundsError) {
+							shopDisplay.content = "Not enough coins!";
+						} else {
+							shopDisplay.content = "Something went wrong";
+						}
 					}
 				}
 				return;
-			}
 			default:
 				return;
 		}
