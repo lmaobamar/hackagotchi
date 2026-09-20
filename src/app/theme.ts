@@ -1,0 +1,15 @@
+export const theme = {
+	bg: "#1a1b26",
+	chrome: "#16161e",
+	fg: "#c0caf5",
+	muted: "#9aa5ce",
+	accent: "#7aa2f7",
+	selected: "#292e42",
+	hover: "#24283b",
+	border: "#292e42",
+	green: "#9ece6a",
+	yellow: "#e0af68",
+	red: "#f7768e",
+	violet: "#bb9af7",
+	cyan: "#7dcfff",
+} as const;
