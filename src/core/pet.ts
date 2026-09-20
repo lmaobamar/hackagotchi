@@ -11,8 +11,12 @@ async function createPet(name: string): Promise<void> {
 		.onConflictDoNothing();
 }
 
+function localDate(d: Date = new Date()): string {
+	return d.toLocaleDateString("en-CA");
+}
+
 async function updateStreak(userId: number = 1): Promise<number> {
-	const today = new Date().toISOString().slice(0, 10);
+	const today = localDate();
 
 	const [current] = await db
 	    .select({streakCount: pet.streakCount, lastStreakDate: pet.lastStreakDate })
@@ -25,7 +29,9 @@ async function updateStreak(userId: number = 1): Promise<number> {
 		return current.streakCount;
 	}
 
-	const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+	const y = new Date();
+	y.setDate(y.getDate() - 1);
+	const yesterday = localDate(y);
 	const newStreak = current.lastStreakDate === yesterday ? current.streakCount + 1 : 1;
 
 	await db
