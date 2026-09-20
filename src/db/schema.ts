@@ -82,3 +82,5 @@ export type Pet = InferSelectModel<typeof pet>;
 export type InsertPet = InferInsertModel<typeof pet>;
 export type Inventory = InferSelectModel<typeof inventory>;
 export type InsertInventory = InferInsertModel<typeof inventory>;
+export type ShopPurchase = InferSelectModel<typeof shopPurchases>;
+export type InsertShopPurchase = InferInsertModel<typeof shopPurchases>;

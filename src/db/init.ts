@@ -1,4 +1,4 @@
-import { db, sqlite } from "./index";
+import { db } from "./index";
 import { userProfile, pet, type Pet, type UserProfile } from "./schema";
 import { eq } from "drizzle-orm";
 import { getCurrentUser } from "./user";
@@ -23,15 +23,6 @@ export async function getAppInitState(): Promise<AppInitState> {
 
 export async function initAppDatabase(): Promise<void> {
 	await db.insert(userProfile).values({}).onConflictDoNothing();
-	sqlite.run(`
-		CREATE TABLE IF NOT EXISTS shop_purchases (
-			user_id INTEGER NOT NULL DEFAULT 1 REFERENCES user_profile(id) ON DELETE CASCADE,
-			epoch_day INTEGER NOT NULL,
-			item_id TEXT NOT NULL,
-			quantity INTEGER NOT NULL DEFAULT 0,
-			PRIMARY KEY (user_id, epoch_day, item_id)
-		);
-	`);
 }
 
 export async function recordLastAppLaunch(): Promise<void> {
