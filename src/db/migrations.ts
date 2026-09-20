@@ -1,5 +1,5 @@
-import path from "path";
 import fs from "fs";
+import path from "path";
 
 const drizzleDir = Bun.isStandaloneExecutable
 	? path.join(import.meta.dir, "drizzle")

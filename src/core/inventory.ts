@@ -1,6 +1,6 @@
+import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { inventory } from "@/db/schema";
-import { sql } from "drizzle-orm";
 
 async function addItemToInventory(
 	itemId: string,

@@ -1,6 +1,6 @@
 import { defineConfig } from "drizzle-kit";
-import { getAppDataLocation } from "@/helpers/storageLocation";
 import path from "path";
+import { getAppDataLocation } from "@/helpers/storageLocation";
 
 const dbPath = path.join(getAppDataLocation(), "hackagotchi.db");
 

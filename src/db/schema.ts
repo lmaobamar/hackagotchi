@@ -1,12 +1,13 @@
 // a good start...
-import {
-	sqliteTable,
-	primaryKey,
-	text,
-	integer,
-} from "drizzle-orm/sqlite-core";
-import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
+
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import { sql } from "drizzle-orm";
+import {
+	integer,
+	primaryKey,
+	sqliteTable,
+	text,
+} from "drizzle-orm/sqlite-core";
 
 export const userProfile = sqliteTable("user_profile", {
 	id: integer("id").primaryKey().default(1),

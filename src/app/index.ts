@@ -1,8 +1,10 @@
 import {
 	BoxRenderable,
-	TextRenderable,
 	createCliRenderer,
+	TextRenderable,
 } from "@opentui/core";
+import petModule from "../core/pet";
+import { getAppInitState } from "../db/init";
 
 export async function startApp() {
 	const renderer = await createCliRenderer({
@@ -10,12 +12,7 @@ export async function startApp() {
 		backgroundColor: "#1131E9",
 	});
 
-	let count = 0;
-	const counter = new TextRenderable(renderer, {
-		id: "counter",
-		content: `Count ${count}`,
-		fg: "#FFFFFF",
-	});
+	const { pet } = await getAppInitState();
 
 	const panel = new BoxRenderable(renderer, {
 		width: 42,
@@ -24,6 +21,7 @@ export async function startApp() {
 		alignItems: "center",
 		justifyContent: "center",
 	});
+
 	const content = new BoxRenderable(renderer, {
 		width: 38,
 		height: 7,
@@ -34,16 +32,26 @@ export async function startApp() {
 		alignItems: "center",
 	});
 
-	content.add(
-		new TextRenderable(renderer, { content: "Create a Pet!", fg: "#DCE3FF" }),
-	);
-	content.add(counter);
-	content.add(
-		new TextRenderable(renderer, {
-			content: "left/right change | q quit",
-			fg: "#AEBBFF",
-		}),
-	);
+	const title = new TextRenderable(renderer, {
+		content: pet ? pet.name : "No pet yet!",
+		fg: "#DCE3FF",
+	});
+
+	const stats = new TextRenderable(renderer, {
+		content: pet
+			? `Hunger ${pet.hunger} | Happiness ${pet.happiness} | Energy ${pet.energy}`
+			: "Press c to create your pet",
+		fg: "#AEBBFF",
+	});
+
+	const instructions = new TextRenderable(renderer, {
+		content: pet ? "q quit" : "c create | q quit",
+		fg: "#AEBBFF",
+	});
+
+	content.add(title);
+	content.add(stats);
+	content.add(instructions);
 	panel.add(content);
 	renderer.root.add(panel);
 
@@ -52,16 +60,13 @@ export async function startApp() {
 			case "q":
 				renderer.destroy();
 				return;
-			case "r":
-				counter.content = `Count ${count} (R)`;
-				return;
-			case "left":
-				count--;
-				counter.content = `Count ${count}`;
-				return;
-			case "right":
-				count++;
-				counter.content = `Count ${count}`;
+			case "c":
+				if (!pet) {
+					await petModule.createPet("Orpheus Jr");
+					title.content = "Orpheus Jr";
+					stats.content = " Hunger 100 | Happiness 50 | Energy 30";
+					instructions.content = "q quit";
+				}
 				return;
 			default:
 				return;
