@@ -1,8 +1,7 @@
 import type { StartupInfo } from "@/app/types/startupInfo";
 import { db } from "@/db";
 import { getAppInitState, type AppInitState } from "@/db/init";
-import { pet, userProfile, type InsertPet } from "@/db/schema";
-import { getCurrentUser } from "@/db/user";
+import { pet } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 // TODO:
