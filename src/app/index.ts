@@ -10,6 +10,7 @@ import { InsufficientFundsError } from "@/db/errors";
 import { getAppInitState } from "@/db/init";
 import { AppView, type AppPage, type AppSnapshot } from "./view";
 import { theme } from "./theme";
+import balance from "@/core/balance";
 
 export async function startApp() {
 	const renderer = await createCliRenderer({
@@ -107,6 +108,9 @@ export async function startApp() {
 			if (key.name === "q") {
 				renderer.destroy();
 				return;
+			}
+			if (key.name === "c" && process.env.NODE_ENV !== "production") {
+				balance.creditCoinsSync(1000, 1);
 			}
 			if (key.name === "\\" && process.env.NODE_ENV !== "production") {
 				renderer.console.toggle();

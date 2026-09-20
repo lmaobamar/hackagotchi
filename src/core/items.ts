@@ -1,8 +1,11 @@
+import shopArt from "@/art/shopArt";
+
 export interface Item {
 	id: string;
 	name: string;
 	description: string;
 	price: number;
+	art?: string;
 }
 
 export const ITEMS: Item[] = [
@@ -11,6 +14,7 @@ export const ITEMS: Item[] = [
 		name: "Streak Reviver",
 		description: "Restores a broken coding streak.",
 		price: 50,
+		art: shopArt.streakReviver,
 	},
 	{
 		id: "happiness_bottle",
