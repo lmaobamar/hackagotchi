@@ -1,8 +1,13 @@
 import {
 	BoxRenderable,
-	TextRenderable,
 	createCliRenderer,
+	TextRenderable,
 } from "@opentui/core";
+import petModule from "../core/pet";
+import { getAppInitState } from "../db/init";
+import { getDailyShop } from "../core/shop";
+import balance from "../db/balance";
+import invModule from "../core/inventory";
 
 export async function startApp() {
 	const renderer = await createCliRenderer({
@@ -10,23 +15,25 @@ export async function startApp() {
 		backgroundColor: "#1131E9",
 	});
 
-	let count = 0;
-	const counter = new TextRenderable(renderer, {
-		id: "counter",
-		content: `Count ${count}`,
-		fg: "#FFFFFF",
-	});
+	let currentShop : ReturnType<typeof getDailyShop> = [];
+
+	const { pet, user } = await getAppInitState();
+
+	if (pet) {
+		await petModule.updateStreak(pet.userId);
+	}
 
 	const panel = new BoxRenderable(renderer, {
-		width: 42,
-		height: 9,
+		width: 47,
+		height: 15,
 		backgroundColor: "#1131E9",
 		alignItems: "center",
 		justifyContent: "center",
 	});
+
 	const content = new BoxRenderable(renderer, {
-		width: 38,
-		height: 7,
+		width: 40,
+		height: 13,
 		backgroundColor: "#2947F0",
 		padding: 1,
 		flexDirection: "column",
@@ -34,16 +41,32 @@ export async function startApp() {
 		alignItems: "center",
 	});
 
-	content.add(
-		new TextRenderable(renderer, { content: "Create a Pet!", fg: "#DCE3FF" }),
-	);
-	content.add(counter);
-	content.add(
-		new TextRenderable(renderer, {
-			content: "left/right change | q quit",
-			fg: "#AEBBFF",
-		}),
-	);
+	const title = new TextRenderable(renderer, {
+		content: pet ? pet.name : "No pet yet!",
+		fg: "#DCE3FF",
+	});
+
+	const stats = new TextRenderable(renderer, {
+		content: pet
+			? `Hunger ${pet.hunger} | Happiness ${pet.happiness} | Energy ${pet.energy} | Streak ${pet.streakCount}`
+			: "Press c to create your pet",
+		fg: "#AEBBFF",
+	});
+
+	const instructions = new TextRenderable(renderer, {
+		content: pet ? "s shop - q quit" : "c create - s shop - q quit",
+		fg: "#AEBBFF",
+	});
+
+	const shopDisplay = new TextRenderable(renderer, {
+		content:"",
+		fg: "#DCE3FF"
+	});
+
+	content.add(title);
+	content.add(stats);
+	content.add(instructions);
+	content.add(shopDisplay);
 	panel.add(content);
 	renderer.root.add(panel);
 
@@ -52,17 +75,38 @@ export async function startApp() {
 			case "q":
 				renderer.destroy();
 				return;
-			case "r":
-				counter.content = `Count ${count} (R)`;
+			case "c":
+				if (!pet) {
+					await petModule.createPet("Orpheus Jr");
+					title.content = "Orpheus Jr";
+					stats.content = " Hunger 100 | Happiness 50 | Energy 30";
+					instructions.content = "s shop - q quit";
+				}
 				return;
-			case "left":
-				count--;
-				counter.content = `Count ${count}`;
+			case "s":
+				if (user)	{
+					currentShop = getDailyShop (user.secret);
+					shopDisplay.content = currentShop
+					    .map((entry, i) => `${i +1}. ${entry.item.name} : ${entry.item.price}c (${entry.stock} in stock)`)
+						.join("\n");
+				}
 				return;
-			case "right":
-				count++;
-				counter.content = `Count ${count}`;
+			case "1":
+			case "2":
+			case "3": {
+				const index = Number(key.name) - 1;
+				const entry = currentShop[index];
+				if (entry && user) {
+					try {
+						balance.debitCoinsSync(entry.item.price, user.id);
+						invModule.addItemToInventory(entry.item.id, 1);
+						shopDisplay.content = `Bought ${entry.item.name}!`;
+					} catch {
+						shopDisplay.content = "Not enough coins!";
+					}
+				}
 				return;
+			}	
 			default:
 				return;
 		}

@@ -1,14 +1,15 @@
 // location helper per platform
+
+import fs from "fs";
 import os from "os";
 import path from "path";
-import fs from "fs";
 
 let decidedPath: string;
 export function getAppDataLocation() {
 	if (decidedPath) return decidedPath;
 	const homedir = os.homedir();
 	switch (process.platform) {
-		case "win32":
+		case "win32": {
 			const localAppData = process.env.LOCALAPPDATA;
 			if (localAppData) {
 				decidedPath = path.join(localAppData, "hackagotchi");
@@ -16,6 +17,7 @@ export function getAppDataLocation() {
 			}
 			decidedPath = path.join(homedir, "AppData", "Local", "hackagotchi");
 			break;
+		}
 		case "darwin":
 			decidedPath = path.join(
 				homedir,

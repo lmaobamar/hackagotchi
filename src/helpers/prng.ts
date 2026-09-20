@@ -21,7 +21,7 @@ export function createPRNG(
 		internalSeed = (internalSeed ^ Math.imul(entropyHash, 0x9e3779b9)) >>> 0;
 	}
 
-	return function () {
+	return () => {
 		let t = (internalSeed += 0x6d2b79f5);
 		t = Math.imul(t ^ (t >>> 15), t | 1);
 		t ^= t + Math.imul(t ^ (t >>> 7), t | 61);

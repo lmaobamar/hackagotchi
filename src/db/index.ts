@@ -1,10 +1,10 @@
 import { Database } from "bun:sqlite";
 import { drizzle } from "drizzle-orm/bun-sqlite";
-import * as schema from "./schema";
+import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import path from "path";
 import { getAppDataLocation } from "@/helpers/storageLocation";
-import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import migrations from "./migrations";
+import * as schema from "./schema";
 
 const dbDir = getAppDataLocation();
 const dbPath = path.join(dbDir, "hackagotchi.db");

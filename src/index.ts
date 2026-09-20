@@ -1,6 +1,6 @@
-import { sqlite, runMigrations } from "@/db";
-import { initAppDatabase } from "@/db/init";
 import { startApp } from "@/app";
+import { runMigrations, sqlite } from "@/db";
+import { initAppDatabase } from "@/db/init";
 
 function shutdownTemp() {
 	// console.log("shutdownTemp");

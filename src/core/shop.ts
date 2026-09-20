@@ -12,7 +12,9 @@ function getDailyShop(userSecret: string): ShopEntry[] {
 	const shuffled = [...ITEMS];
 	for (let i = shuffled.length - 1; i > 0; i--) {
 		const j = Math.floor(rand() * (i + 1));
-		[shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+		const temp = shuffled[i];
+		shuffled[i] = shuffled[j] as Item;
+		shuffled[j] = temp as Item;
 	}
 
 	const chosen = shuffled.slice(0, 3);
