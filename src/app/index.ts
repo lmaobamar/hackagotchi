@@ -3,11 +3,11 @@ import {
 	createCliRenderer,
 	TextRenderable,
 } from "@opentui/core";
-import petModule from "../core/pet";
-import { getAppInitState } from "../db/init";
-import { getDailyShop } from "../core/shop";
-import balance from "../db/balance";
-import invModule from "../core/inventory";
+import petModule from "@/core/pet";
+import { getAppInitState } from "@/db/init";
+import shopModule from "@/core/shop";
+import balanceModule from "@/db/balance";
+import invModule from "@/core/inventory";
 
 export async function startApp() {
 	const renderer = await createCliRenderer({
@@ -15,7 +15,7 @@ export async function startApp() {
 		backgroundColor: "#1131E9",
 	});
 
-	let currentShop : ReturnType<typeof getDailyShop> = [];
+	let currentShop: ReturnType<typeof shopModule.getDailyShop> = [];
 
 	const { pet, user } = await getAppInitState();
 
@@ -59,8 +59,8 @@ export async function startApp() {
 	});
 
 	const shopDisplay = new TextRenderable(renderer, {
-		content:"",
-		fg: "#DCE3FF"
+		content: "",
+		fg: "#DCE3FF",
 	});
 
 	content.add(title);
@@ -84,10 +84,13 @@ export async function startApp() {
 				}
 				return;
 			case "s":
-				if (user)	{
-					currentShop = getDailyShop (user.secret);
+				if (user) {
+					currentShop = shopModule.getDailyShop(user.secret);
 					shopDisplay.content = currentShop
-					    .map((entry, i) => `${i +1}. ${entry.item.name} : ${entry.item.price}c (${entry.stock} in stock)`)
+						.map(
+							(entry, i) =>
+								`${i + 1}. ${entry.item.name} : ${entry.item.price}c (${entry.stock} in stock)`,
+						)
 						.join("\n");
 				}
 				return;
@@ -98,7 +101,7 @@ export async function startApp() {
 				const entry = currentShop[index];
 				if (entry && user) {
 					try {
-						balance.debitCoinsSync(entry.item.price, user.id);
+						balanceModule.debitCoinsSync(entry.item.price, user.id);
 						invModule.addItemToInventory(entry.item.id, 1);
 						shopDisplay.content = `Bought ${entry.item.name}!`;
 					} catch {
@@ -106,7 +109,7 @@ export async function startApp() {
 					}
 				}
 				return;
-			}	
+			}
 			default:
 				return;
 		}
