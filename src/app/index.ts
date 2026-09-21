@@ -19,6 +19,7 @@ export async function startApp() {
 	});
 	let disposed = false;
 	let busy = false;
+	let nameInput: string | null = null;
 	let view: AppView | null = null;
 	let snapshot: AppSnapshot = {
 		coins: 0,
@@ -135,14 +136,14 @@ export async function startApp() {
 			busy = false;
 		}
 	};
-	const createPet = async () => {
+	const createPet = async (name: string ) => {
 		if (busy || disposed || snapshot.pet) return;
 		busy = true;
 		try {
-			await petModule.createPet("Orpheus Jr");
+			await petModule.createPet(name);
 			snapshot = {
 				...snapshot,
-				feedback: "Orpheus Jr has moved into the habitat.",
+				feedback: `${name} has moved into the habitat`,
 			};
 			await reload();
 		} catch {
@@ -151,8 +152,35 @@ export async function startApp() {
 			busy = false;
 		}
 	};
+	const showNamePrompt = () => {
+		snapshot = {
+			...snapshot,
+			feedback: `Name your Pet: ${nameInput ?? ""}_ (max 20 chars, press Enter to confirm & Esc to cancel)`,
+		};
+		render();
+	};
 	const handleKey = async (key: KeyEvent) => {
 		try {
+			if (nameInput !== null) {
+				if (key.name === "escape") {
+					nameInput = null;
+					return navigate("home");
+				}
+			if (key.name === "return" || key.name === "enter") {
+				const chosen = nameInput.trim() || "Orpheus Jr";
+				nameInput = null;
+				return await createPet(chosen);
+			}
+			if (key.name === "backspace") {
+				nameInput = nameInput.slice(0, -1);
+				return showNamePrompt();
+			}
+			const ch = key.sequence;
+			if (ch && ch.length === 1 && ch >= " " && nameInput.length < 20) {
+				nameInput += ch;
+			}
+			return showNamePrompt();
+			}	
 			if (key.name === "q") {
 				renderer.destroy();
 				return;
@@ -176,7 +204,11 @@ export async function startApp() {
 			}
 			if (key.name === "h" || key.name === "escape") return navigate("home");
 			if (key.name === "s") return navigate("shop");
-			if (key.name === "c") return await createPet();
+			if (key.name === "c") {
+				if (snapshot.pet) return;
+				nameInput = "";
+				return showNamePrompt();
+			}
 			if (snapshot.page !== "shop") return;
 			if (key.name === "up" || key.name === "k")
 				return selectShop(Math.max(0, snapshot.selectedShopIndex - 1));
