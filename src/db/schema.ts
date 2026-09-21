@@ -39,6 +39,8 @@ export const pet = sqliteTable("pet", {
 	// economy
 	streakCount: integer("streak_count").notNull().default(0),
 	lastStreakDate: text("last_streak_date"),
+	previousStreak: integer("previous_streak").notNull().default(0),
+	streakproceedUntil: text("decay_slowed_until"),
 
 	lastInteractionAt: text("last_interaction_at")
 		.notNull()
