@@ -12,4 +12,6 @@ export const theme = {
 	red: "#f7768e",
 	violet: "#bb9af7",
 	cyan: "#7dcfff",
+	counter: "#24283b",
+	counterEdge: "#3b4261",
 } as const;
