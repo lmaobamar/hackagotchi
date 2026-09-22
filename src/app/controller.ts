@@ -50,10 +50,7 @@ export class AppController {
 			shop,
 			selectedShopIndex: Math.max(
 				0,
-				Math.min(
-					this.snapshot.selectedShopIndex,
-					Math.max(0, shop.length - 1),
-				),
+				Math.min(this.snapshot.selectedShopIndex, Math.max(0, shop.length - 1)),
 			),
 		};
 		this.render();
@@ -211,11 +208,11 @@ export class AppController {
 			if (this.snapshot.page !== "shop") return;
 			if (key.name === "pageup") return this.view?.scrollShop(-1);
 			if (key.name === "pagedown") return this.view?.scrollShop(1);
-			if (key.name === "up" || key.name === "k")
+			if (key.name === "left")
 				return this.selectShop(
 					Math.max(0, this.snapshot.selectedShopIndex - 1),
 				);
-			if (key.name === "down" || key.name === "j")
+			if (key.name === "right")
 				return this.selectShop(
 					Math.min(
 						this.snapshot.shop.length - 1,
