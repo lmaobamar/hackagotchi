@@ -26,7 +26,7 @@ export const pet = sqliteTable("pet", {
 		.default(1)
 		.references(() => userProfile.id, { onDelete: "cascade" }),
 
-	name: text("name").notNull(),
+	name: text("name").notNull().default("hackagotchi"),
 
 	// stats
 	hunger: integer("hunger").notNull().default(100),
@@ -40,7 +40,8 @@ export const pet = sqliteTable("pet", {
 	streakCount: integer("streak_count").notNull().default(0),
 	lastStreakDate: text("last_streak_date"),
 	previousStreak: integer("previous_streak").notNull().default(0),
-	streakproceedUntil: text("decay_slowed_until"),
+	streakProtectedUntil: text("streak_protected_until"),	
+	decaySlowedUntil: text("decay_slowed_until"),
 
 	lastInteractionAt: text("last_interaction_at")
 		.notNull()
