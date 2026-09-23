@@ -19,6 +19,7 @@
 	"type": "module",
 	"dependencies": {
 		"@opentui/core": "^0.5.11",
-		"drizzle-orm": "^0.45.2"
+		"drizzle-orm": "^0.45.2",
+		"ps-list": "^9.0.0"
 	}
 }

@@ -8,7 +8,7 @@ export class TooSmallPanel extends Panel {
 		super(
 			new TextRenderable(renderer, {
 				content:
-					"Hackagotchi needs at least 48 × 17\nResize to continue, or press q to quit.",
+					"Hackagotchi needs at least 48 x 17\nResize to continue, or press q to quit.",
 				fg: theme.muted,
 				width: "100%",
 				height: "100%",
