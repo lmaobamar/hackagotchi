@@ -40,12 +40,15 @@ export const pet = sqliteTable("pet", {
 	streakCount: integer("streak_count").notNull().default(0),
 	lastStreakDate: text("last_streak_date"),
 	previousStreak: integer("previous_streak").notNull().default(0),
-	streakProtectedUntil: text("streak_protected_until"),	
+	streakProtectedUntil: text("streak_protected_until"),
 	decaySlowedUntil: text("decay_slowed_until"),
 
 	lastInteractionAt: text("last_interaction_at")
 		.notNull()
 		.default(sql`(datetime('now'))`),
+
+	// cosmetic
+	petStyle: text("pet_style").notNull().default("sprout"),
 });
 
 export const inventory = sqliteTable(

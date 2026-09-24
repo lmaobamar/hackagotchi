@@ -3,8 +3,11 @@ import { theme } from "@/app/theme";
 import type { AppSnapshot, ViewportMode } from "../types";
 import { meter } from "../format";
 import { Panel } from "./panel";
+import petArt from "@/art/petArt";
+import treasureArt from "@/art/treasureArt";
 
-const PET_ART = "    /\\_/\\\n   ( o.o )\n     > ^ <";
+// const PET_ART = "    /\\_/\\\n   ( o.o )\n     > ^ <";
+const PET_ART = petArt.byte.happy; // TODO: By used pet
 const EMPTY_HABITAT = "    .--.\n   (    )\n    `--'";
 
 export class HomePanel extends Panel {
