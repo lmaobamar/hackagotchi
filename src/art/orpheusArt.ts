@@ -15,6 +15,12 @@ const confused = `    *...*     ..
      .#.                 *#.              #.
        #.              ##:                =
         *.###:#*..:.*#.                   #
-                  ..                     .`;
+                   ..                     .`;
 
-export default { confused };
+const compact = String.raw`  __
+ (o )>
+/___\_`;
+
+const minimal = "(o)>";
+
+export default { confused, compact, minimal };

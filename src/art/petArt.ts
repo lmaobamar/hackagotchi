@@ -150,6 +150,79 @@ const nib = {
    '     '`,
 };
 
+type CompactPetSprite = Record<keyof typeof sprout, string>;
+
+export const compactPetArt = {
+	sprout: {
+		idle: String.raw`  _/\_
+ (o o)
+ /___/`,
+		happy: String.raw`  _/\_ +
+ (^ ^)
+ /___/`,
+		hungry: String.raw`  _/\_
+ (. .)
+ /_o_/`,
+		sleeping: String.raw`  _/\_ z
+ (- -)
+ /___/`,
+		sad: String.raw`  _/\_
+ (; ;)
+ /_n_/`,
+	},
+	byte: {
+		idle: String.raw` /\ /\
+|o o|
+ \_w_/`,
+		happy: String.raw` /\ /\ +
+|^ ^|
+ \___/`,
+		hungry: String.raw` /\ /\
+|. .|
+ \_o_/`,
+		sleeping: String.raw` /\ /\ z
+|- -|
+ \___/`,
+		sad: String.raw` /\ /\
+|; ;|
+ \_n_/`,
+	},
+	pip: {
+		idle: String.raw` __ __
+|o o|
+'o___o'`,
+		happy: String.raw` __ __ +
+|^ ^|
+'o___o'`,
+		hungry: String.raw` __ __
+|. .|
+'o_o_o'`,
+		sleeping: String.raw` __ __ z
+|- -|
+'o___o'`,
+		sad: String.raw` __ __
+|; ;|
+'o_n_o'`,
+	},
+	nib: {
+		idle: String.raw` /\_/\
+(o o)
+ \_v_/`,
+		happy: String.raw` /\_/\ +
+(^ ^)
+ \___/`,
+		hungry: String.raw` /\_/\
+(. .)
+ \_o_/`,
+		sleeping: String.raw` /\_/\ z
+(- -)
+ \_v_/`,
+		sad: String.raw` /\_/\
+(; ;)
+ \_n_/`,
+	},
+} satisfies Record<"sprout" | "byte" | "pip" | "nib", CompactPetSprite>;
+
 const petArt = { sprout, byte, pip, nib };
 
 export type PetSpriteName = keyof typeof petArt;

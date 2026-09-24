@@ -11,8 +11,12 @@ interface CounterSlot {
 	front: BoxRenderable;
 }
 
+type ShopSceneTier = "full" | "medium" | "tiny";
+
 export class ShopCounter extends Panel {
 	private readonly slots: CounterSlot[];
+	private readonly surface: BoxRenderable;
+	private readonly front: BoxRenderable;
 
 	constructor(renderer: CliRenderer, actions: AppViewActions) {
 		const root = new BoxRenderable(renderer, {
@@ -31,7 +35,7 @@ export class ShopCounter extends Panel {
 			bottom: 0,
 			backgroundColor: theme.chrome,
 		}));
-		const surface = new BoxRenderable(renderer, {
+		this.surface = new BoxRenderable(renderer, {
 			width: "100%",
 			height: 7,
 			flexShrink: 0,
@@ -41,7 +45,7 @@ export class ShopCounter extends Panel {
 			backgroundColor: theme.counter,
 			flexDirection: "row",
 		});
-		const front = new BoxRenderable(renderer, {
+		this.front = new BoxRenderable(renderer, {
 			width: "100%",
 			height: 4,
 			flexShrink: 0,
@@ -68,7 +72,7 @@ export class ShopCounter extends Panel {
 				selectable: false,
 			});
 			stand.add(icon);
-			surface.add(stand);
+			this.surface.add(stand);
 			const plaque = new BoxRenderable(renderer, {
 				width: 0,
 				minWidth: 0,
@@ -99,24 +103,35 @@ export class ShopCounter extends Panel {
 			});
 			plaque.add(label);
 			plaque.add(price);
-			front.add(plaque);
+			this.front.add(plaque);
 			return { icon, label, price, front: plaque };
 		});
-		root.add(surface);
-		root.add(front);
+		root.add(this.surface);
+		root.add(this.front);
 	}
 
-	update(snapshot: AppSnapshot): void {
+	update(snapshot: AppSnapshot, tier: ShopSceneTier): void {
+		this.surface.height = tier === "full" ? 7 : tier === "medium" ? 4 : 3;
+		this.front.height = tier === "full" ? 4 : tier === "medium" ? 3 : 2;
+		this.root.paddingRight = tier === "tiny" ? 0 : 1;
+		this.root.paddingBottom = tier === "tiny" ? 0 : 1;
 		for (const [index, slot] of this.slots.entries()) {
 			const entry = snapshot.shop[index];
 			const selected = index === snapshot.selectedShopIndex;
 			const inStock = Boolean(entry && entry.stock > 0);
-			slot.icon.content = entry ? shopArt.byItemId[entry.item.id] ?? "" : "";
+			slot.icon.content = entry
+				? (tier === "full" ? shopArt.byItemId : tier === "medium" ? shopArt.compactByItemId : shopArt.minimalByItemId)[entry.item.id] ?? ""
+				: "";
+			slot.icon.width = tier === "full" ? 9 : tier === "medium" ? 5 : 1;
+			slot.icon.height = tier === "full" ? 5 : tier === "medium" ? 2 : 1;
+			slot.icon.visible = true;
 			slot.icon.fg = !inStock ? theme.muted : selected ? theme.accent : theme.yellow;
 			slot.label.content = entry?.item.name ?? "";
 			slot.label.fg = selected ? theme.accent : theme.fg;
 			slot.price.content = entry
-				? `${index + 1} · ${entry.item.price}c · ${inStock ? `${entry.stock} left` : "sold out"}`
+				? tier === "tiny"
+					? `${entry.item.price}c ${inStock ? `${entry.stock}` : "out"}`
+					: `${index + 1} · ${entry.item.price}c · ${inStock ? `${entry.stock} left` : "sold out"}`
 				: "";
 			slot.price.fg = inStock ? theme.muted : theme.red;
 			slot.front.backgroundColor = selected ? theme.selected : theme.chrome;

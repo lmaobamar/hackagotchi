@@ -33,12 +33,13 @@ export class MainPanel extends Panel {
 		this.root.add(this.shop.root);
 	}
 
-	update(snapshot: AppSnapshot, mode: ViewportMode): void {
+	update(snapshot: AppSnapshot, mode: ViewportMode, width: number, height: number): void {
+		this.root.padding = mode === "compact" ? 0 : 1;
 		this.heading.content =
 			snapshot.page === "home" ? "Home" : "Orpheus' Shop";
 		this.home.setVisible(snapshot.page === "home");
 		this.shop.setVisible(snapshot.page === "shop");
 		this.home.update(snapshot, mode);
-		this.shop.update(snapshot, mode);
+		this.shop.update(snapshot, mode, width, height);
 	}
 }

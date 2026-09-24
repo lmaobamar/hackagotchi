@@ -3,11 +3,9 @@ import { theme } from "@/app/theme";
 import type { AppSnapshot, ViewportMode } from "../types";
 import { meter } from "../format";
 import { Panel } from "./panel";
-import petArt from "@/art/petArt";
-import treasureArt from "@/art/treasureArt";
+import petArt, { compactPetArt } from "@/art/petArt";
 
-// const PET_ART = "    /\\_/\\\n   ( o.o )\n     > ^ <";
-const PET_ART = petArt.byte.happy; // TODO: By used pet
+const PET_ART = petArt.byte.happy; // TODO: by used pet
 const EMPTY_HABITAT = "    .--.\n   (    )\n    `--'";
 
 export class HomePanel extends Panel {
@@ -29,6 +27,10 @@ export class HomePanel extends Panel {
 			content: "",
 			fg: theme.violet,
 			alignSelf: "center",
+			height: 1,
+			maxWidth: "100%",
+			wrapMode: "none",
+			truncate: true,
 			selectable: false,
 		});
 		this.habitatArea = new BoxRenderable(renderer, {
@@ -60,20 +62,32 @@ export class HomePanel extends Panel {
 	}
 
 	update(snapshot: AppSnapshot, mode: ViewportMode): void {
-		this.habitatArea.flexGrow = mode === "compact" ? 0 : 1;
-		this.habitatArea.height = mode === "compact" ? 3 : "auto";
+		const compact = mode === "compact";
+		this.habitatArea.flexGrow = compact ? 0 : 1;
+		this.habitatArea.flexShrink = compact ? 0 : 1;
+		this.habitatArea.height = compact ? 3 : "auto";
+		this.condition.truncate = compact;
+		for (const row of this.statRows) row.truncate = compact;
 		const pet = snapshot.pet;
 		if (pet) {
 			const lowestStat = Math.min(pet.hunger, pet.happiness, pet.energy);
-			this.habitat.content = PET_ART;
+			this.habitat.content = compact ? compactPetArt.byte.happy : PET_ART;
 			this.petName.content = pet.name;
-			this.condition.content = !pet.isAlive
-				? "Condition: needs immediate care"
-				: lowestStat < 25
-					? "Condition: struggling"
-					: lowestStat < 55
-						? "Condition: could use some care"
-						: "Condition: happy!! :D";
+			this.condition.content = compact
+				? !pet.isAlive
+					? "Needs care"
+					: lowestStat < 25
+						? "Struggling"
+						: lowestStat < 55
+							? "Needs care"
+							: "Happy"
+				: !pet.isAlive
+					? "Condition: needs immediate care"
+					: lowestStat < 25
+						? "Condition: struggling"
+						: lowestStat < 55
+							? "Condition: could use some care"
+							: "Condition: happy!! :D";
 			this.condition.fg = !pet.isAlive
 				? theme.red
 				: lowestStat < 55
@@ -84,7 +98,7 @@ export class HomePanel extends Panel {
 			this.statRows[2]!.content = meter("Energy", pet.energy);
 			return;
 		}
-		this.habitat.content = EMPTY_HABITAT;
+		this.habitat.content = compact ? " .--.\n(    )\n `--'" : EMPTY_HABITAT;
 		this.petName.content = "An empty habitat";
 		this.condition.content = "Press c to hatch your companion.";
 		this.condition.fg = theme.yellow;

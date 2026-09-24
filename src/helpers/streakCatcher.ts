@@ -3,15 +3,16 @@ import psList, { type ProcessDescriptor } from "ps-list";
 import { getCodeEditorsByPlatform } from "./editorsByPlatform";
 
 // this is slow!!
-async function editorFound(): Promise<boolean> {
+// and doesnt fucking work
+export async function editorFound(): Promise<boolean> {
+	const targetEditors = new Set(
+		getCodeEditorsByPlatform().map((editor) => editor.toLowerCase()),
+	);
 	const proclist: ProcessDescriptor[] = await psList();
-	let foundIt: boolean = false;
-	for (const process of proclist) {
-		for (const editor in getCodeEditorsByPlatform()) {
-			if (process.cmd === editor) {
-				foundIt = true;
-			}
-		}
+	for (const p of proclist) {
+		console.log(p.name);
 	}
-	return foundIt;
+	return proclist.some((process) =>
+		targetEditors.has(process.name.toLowerCase()),
+	);
 }

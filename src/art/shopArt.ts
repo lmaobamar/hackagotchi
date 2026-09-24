@@ -71,6 +71,32 @@ const byItemId: Record<string, string> = {
 	"cup_o'_coffee": coffee,
 };
 
+const compactByItemId: Record<string, string> = {
+	streak_reviver: " /\\\n[__]",
+	happiness_bottle: "[==]\n|^^|",
+	energy_drink: ".--.\n|< |",
+	snack_pack: ".--.\n|()|",
+	golden_semicolon: " /;\\\n[__]",
+	debug_spray: "__=>\n[__]",
+	commit_charm: ".--.\n<>>",
+	rubber_duck: " __\n(o)>",
+	night_owl_potion: "[==]\n|o^|",
+	"cup_o'_coffee": ") (\n|_|",
+};
+
+const minimalByItemId: Record<string, string> = {
+	streak_reviver: "♢",
+	happiness_bottle: "!",
+	energy_drink: "▯",
+	snack_pack: "▣",
+	golden_semicolon: ";",
+	debug_spray: "➜",
+	commit_charm: "◇",
+	rubber_duck: "◒",
+	night_owl_potion: "☾",
+	"cup_o'_coffee": "☕",
+};
+
 export default {
 	streakReviver,
 	happinessBottle,
@@ -83,4 +109,6 @@ export default {
 	nightOwlPotion,
 	coffee,
 	byItemId,
+	compactByItemId,
+	minimalByItemId,
 };

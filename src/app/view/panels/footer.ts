@@ -4,6 +4,7 @@ import type { AppSnapshot, ViewportMode } from "../types";
 import { Panel } from "./panel";
 
 export class FooterPanel extends Panel {
+	private readonly box: BoxRenderable;
 	private readonly feedback: TextRenderable;
 	private readonly hints: TextRenderable;
 
@@ -18,6 +19,7 @@ export class FooterPanel extends Panel {
 			flexDirection: "column",
 		});
 		super(root);
+		this.box = root;
 		this.feedback = new TextRenderable(renderer, {
 			content: "",
 			fg: theme.green,
@@ -35,6 +37,10 @@ export class FooterPanel extends Panel {
 	}
 
 	update(snapshot: AppSnapshot, mode: ViewportMode): void {
+		const compact = mode === "compact";
+		this.box.height = compact ? 2 : 3;
+		this.box.paddingX = compact ? 0 : 1;
+		this.box.border = compact ? false : ["top"];
 		this.feedback.content = snapshot.feedback;
 		this.feedback.fg =
 			snapshot.feedback.startsWith("Unable") ||
@@ -42,15 +48,15 @@ export class FooterPanel extends Panel {
 				? theme.red
 				: theme.green;
 		if (snapshot.buyPrompt) {
-			this.hints.content =
-				"← / - Decrease  → / + Increase  Enter Confirm  Esc Cancel";
+			this.hints.content = compact
+				? "←→ Qty  Enter Buy  Esc Cancel"
+				: "← / - Decrease  → / + Increase  Enter Confirm  Esc Cancel";
 			return;
 		}
-		const compact = mode === "compact";
 		this.hints.content =
 			snapshot.page === "shop"
 				? compact
-					? "↑↓ Pick  Enter Buy  PgUp/Dn Scroll  q Quit"
+					? "↑↓ Pick  Enter Buy  Esc Home  q Quit"
 					: "↑↓ / j k Pick  Enter Buy  PgUp/Dn Scroll  Esc Home  q Quit"
 				: snapshot.pet
 					? "h Home  s Shop  q Quit"

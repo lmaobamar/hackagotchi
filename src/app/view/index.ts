@@ -73,12 +73,14 @@ export class AppView {
 			this.renderer.root.height,
 		);
 		this.shell.visible = mode !== "tiny";
-		this.header.update(snapshot);
+		const width = this.renderer.root.width;
+		const height = this.renderer.root.height;
+		this.header.update(snapshot, mode);
 		this.sidebar.update(snapshot, mode);
-		this.main.update(snapshot, mode);
+		this.main.update(snapshot, mode, width, height);
 		this.rail.update(snapshot, mode);
 		this.footer.update(snapshot, mode);
-		this.buyPrompt.update(snapshot);
+		this.buyPrompt.update(snapshot, width, mode);
 		this.tooSmall.update(mode);
 	}
 
