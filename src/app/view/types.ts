@@ -9,6 +9,7 @@ export interface PetSnapshot {
 	energy: number;
 	streakCount: number;
 	isAlive: boolean;
+	petStyle: string;
 }
 
 export interface BuyPromptSnapshot {

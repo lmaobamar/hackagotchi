@@ -10,7 +10,9 @@ export async function processDecay(): Promise<StartupInfo> {
 	const state: AppInitState = await getAppInitState();
 	const user = state.user;
 	const currentPet = state.pet;
-	const newStreak = currentPet ? await petModule.updateStreak(currentPet.userId) : 0;
+	const newStreak = currentPet
+		? await petModule.updateStreak(currentPet.userId)
+		: 0;
 	if (!user || !user.lastLaunchedApp || !currentPet)
 		return { died: false, streakCount: newStreak };
 

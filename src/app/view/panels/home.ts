@@ -5,7 +5,7 @@ import { meter } from "../format";
 import { Panel } from "./panel";
 import petArt, { compactPetArt } from "@/art/petArt";
 
-const PET_ART = petArt.byte.happy; // TODO: by used pet
+// const PET_ART = petArt.byte.happy; // TODO: by used pet
 const EMPTY_HABITAT = "    .--.\n   (    )\n    `--'";
 
 export class HomePanel extends Panel {
@@ -71,7 +71,14 @@ export class HomePanel extends Panel {
 		const pet = snapshot.pet;
 		if (pet) {
 			const lowestStat = Math.min(pet.hunger, pet.happiness, pet.energy);
-			this.habitat.content = compact ? compactPetArt.byte.happy : PET_ART;
+			const style = pet.petStyle as keyof typeof petArt;
+			const art = compact
+				? compactPetArt[style as keyof typeof compactPetArt]
+				: petArt[style];
+
+			const PET_ART = art.happy;
+			console.log(`${style} ggfrickinez`);
+			this.habitat.content = PET_ART;
 			this.petName.content = pet.name;
 			this.condition.content = compact
 				? !pet.isAlive
