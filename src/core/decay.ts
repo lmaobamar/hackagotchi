@@ -1,20 +1,15 @@
-import type { StartupInfo } from "@/app/types/startupInfo";
 import { db } from "@/db";
 import { getAppInitState, type AppInitState } from "@/db/init";
 import { pet } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import petModule from "@/core/pet";
 
-// TODO:
-export async function processDecay(): Promise<StartupInfo> {
+export async function processDecay() {
 	const state: AppInitState = await getAppInitState();
 	const user = state.user;
 	const currentPet = state.pet;
-	const newStreak = currentPet
-		? await petModule.updateStreak(currentPet.userId)
-		: 0;
-	if (!user || !user.lastLaunchedApp || !currentPet)
-		return { died: false, streakCount: newStreak };
+	if (currentPet) await petModule.updateStreak(currentPet.userId);
+	if (!user || !user.lastLaunchedApp || !currentPet) return;
 
 	const lastLaunchTime = user.lastLaunchedApp
 		? new Date(user.lastLaunchedApp).getTime()
@@ -45,5 +40,5 @@ export async function processDecay(): Promise<StartupInfo> {
 		.where(eq(pet.id, currentPet.id));
 
 	// TODO: streak
-	return { died: !isAlive, streakCount: newStreak };
+	return;
 }
