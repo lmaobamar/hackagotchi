@@ -2,10 +2,11 @@ import { BoxRenderable, TextRenderable, type CliRenderer } from "@opentui/core";
 import orpheusArt from "@/art/orpheusArt";
 import { theme } from "@/app/theme";
 import { Panel } from "./panel";
+import orpheusTalk from "@/helpers/orpheusTalk";
 
 type ShopSceneTier = "full" | "medium" | "tiny";
 
-const speech = "Lorem ipsum sit dolor amet";
+const speech = orpheusTalk.getRandom();
 const artLines = orpheusArt.confused.split("\n");
 
 export class Shopkeeper extends Panel {

@@ -8,11 +8,9 @@ export async function editorFound(): Promise<boolean> {
 	const targetEditors = new Set(
 		getCodeEditorsByPlatform().map((editor) => editor.toLowerCase()),
 	);
-	const proclist: ProcessDescriptor[] = await psList();
-	for (const p of proclist) {
-		console.log(p.name);
-	}
-	return proclist.some((process) =>
-		targetEditors.has(process.name.toLowerCase()),
-	);
+	const proclist = await psList();
+	return proclist.some((p) => {
+		const haystack = (p.cmd ?? p.name).toLowerCase();
+		return [...targetEditors].some((editor) => haystack.includes(editor));
+	});
 }
