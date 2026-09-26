@@ -16,6 +16,7 @@ import {
 	type AppSnapshot,
 	type AppViewActions,
 } from "./view";
+import streak from "@/core/streak";
 
 export class AppController {
 	private snapshot: AppSnapshot = createInitialSnapshot();
@@ -27,7 +28,7 @@ export class AppController {
 
 	async start(): Promise<void> {
 		const initial = await getAppInitState();
-		if (initial.pet) await petModule.updateStreak(initial.pet.userId);
+		if (initial.pet) await streak.updateStreak(initial.pet.userId);
 		await this.reload();
 		this.view = new AppView(this.renderer, this.actions, this.snapshot);
 		this.renderer.keyInput.on("keypress", this.handleKey);
