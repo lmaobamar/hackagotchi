@@ -29,6 +29,14 @@ async function getInventoryItem(itemId: string, userId: number = 1) {
 	return row ?? null;
 }
 
+async function getUserInventory(userId: number = 1) {
+	const i1 = await db
+		.select()
+		.from(inventory)
+		.where(eq(inventory.userId, userId));
+	return i1;
+}
+
 async function removeItemFromInventory(
 	itemId: string,
 	userId: number = 1,
@@ -49,4 +57,5 @@ export default {
 	addItemToInventory,
 	getInventoryItem,
 	removeItemFromInventory,
+	getUserInventory,
 };
