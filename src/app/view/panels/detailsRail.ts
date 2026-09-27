@@ -81,6 +81,20 @@ export class DetailsRail extends Panel {
 			this.art.visible = false;
 			return;
 		}
+		if (snapshot.page === "inventory") {
+			const total = snapshot.inventory.reduce(
+				(sum, entry) => sum + entry.quantity,
+			0,
+			);
+			this.title.content = "Inventory";
+			this.detail.content = snapshot.inventory.length
+				? `${snapshot.inventory.length} item ${snapshot.inventory.length === 1 ? "type" : "types"}\n${total} item${total === 1 ? "" : "s"} in your bag\n\nUse s to buy more supplies.`
+				: "Your bag is empty.\n\nUse s to visit Orpheus' Shop.";
+			this.detail.fg = theme.fg;
+			this.action.visible = false;
+			this.art.visible = false;
+			return;
+		}
 		this.title.content = "Selected item";
 		this.detail.content = selected
 			? `${selected.item.name}\n\n${selected.item.description}\n\nPrice: ${selected.item.price} coins\n${available ? (canAfford ? "You can afford this." : "You need more coins.") : "Sold out."}`

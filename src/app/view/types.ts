@@ -1,6 +1,7 @@
+import type { Item } from "@/core/items";
 import type { ShopEntry } from "@/core/shop";
 
-export type AppPage = "home" | "shop";
+export type AppPage = "home" | "shop" | "inventory";
 
 export interface PetSnapshot {
 	name: string;
@@ -17,12 +18,19 @@ export interface BuyPromptSnapshot {
 	quantity: number;
 }
 
+export interface InventoryEntry {
+	item: Item;
+	quantity: number;
+}
+
 export interface AppSnapshot {
 	coins: number;
 	pet: PetSnapshot | null;
 	shop: ShopEntry[];
+	inventory: InventoryEntry[];
 	page: AppPage;
 	selectedShopIndex: number;
+	selectedInventoryIndex: number;
 	feedback: string;
 	buyPrompt: BuyPromptSnapshot | null;
 }

@@ -84,8 +84,10 @@ export class AppView {
 		this.tooSmall.update(mode);
 	}
 
-	scrollShop(direction: number): void {
-		this.main.shop.scrollBy(direction);
+	scrollPage(direction: number): void {
+		if (this.snapshot.page === "inventory")
+			this.main.inventory.scrollBy(direction);
+		else this.main.shop.scrollBy(direction);
 	}
 
 	destroy(): void {

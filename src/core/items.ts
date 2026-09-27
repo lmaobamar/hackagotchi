@@ -71,3 +71,7 @@ export const ITEMS: Item[] = [
 		price: 10,
 	},
 ];
+
+export function getItemById(id: string): Item | undefined {
+	return ITEMS.find((item) => item.id === id);
+}

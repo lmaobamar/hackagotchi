@@ -53,13 +53,19 @@ export class FooterPanel extends Panel {
 				: "← / - Decrease  → / + Increase  Enter Confirm  Esc Cancel";
 			return;
 		}
+		if (snapshot.page === "inventory") {
+			this.hints.content = compact
+				? "↑↓ Scroll  Esc Home  q Quit"
+				: "PgUp/Dn Scroll  Esc Home  q Quit";
+			return;
+		}
 		this.hints.content =
 			snapshot.page === "shop"
 				? compact
 					? "↑↓ Pick  Enter Buy  Esc Home  q Quit"
 					: "↑↓ / j k Pick  Enter Buy  PgUp/Dn Scroll  Esc Home  q Quit"
 				: snapshot.pet
-					? "h Home  s Shop  q Quit"
-					: "c Create  s Shop  q Quit";
+					? "h Home  s Shop  i Inventory  q Quit"
+					: "c Create  s Shop  i Inventory  q Quit";
 	}
 }

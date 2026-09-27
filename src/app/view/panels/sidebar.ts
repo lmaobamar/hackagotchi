@@ -6,6 +6,7 @@ import { Panel } from "./panel";
 export class SidebarPanel extends Panel {
 	private readonly homeNav: TextRenderable;
 	private readonly shopNav: TextRenderable;
+	private readonly inventoryNav: TextRenderable;
 
 	constructor(renderer: CliRenderer, actions: AppViewActions) {
 		const root = new BoxRenderable(renderer, {
@@ -38,15 +39,25 @@ export class SidebarPanel extends Panel {
 			selectable: false,
 			onMouseDown: () => actions.navigate("shop"),
 		});
+		this.inventoryNav = new TextRenderable(renderer, {
+			content: "  Inventory",
+			fg: theme.fg,
+			selectable: false,
+			onMouseDown: () => actions.navigate("inventory"),
+		});
 		this.root.add(this.homeNav);
 		this.root.add(this.shopNav);
+		this.root.add(this.inventoryNav);
 	}
 
 	update(snapshot: AppSnapshot, mode: ViewportMode): void {
 		this.root.visible = mode === "standard" || mode === "wide";
 		this.homeNav.content = `${snapshot.page === "home" ? ">" : " "} Home`;
 		this.shopNav.content = `${snapshot.page === "shop" ? ">" : " "} Shop`;
+		this.inventoryNav.content = `${snapshot.page === "inventory" ? ">" : " "} Inventory`;
 		this.homeNav.bg = snapshot.page === "home" ? theme.selected : theme.chrome;
 		this.shopNav.bg = snapshot.page === "shop" ? theme.selected : theme.chrome;
+		this.inventoryNav.bg =
+			snapshot.page === "inventory" ? theme.selected : theme.chrome;
 	}
 }

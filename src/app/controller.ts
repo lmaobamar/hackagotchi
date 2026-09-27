@@ -4,6 +4,8 @@ import {
 	type KeyEvent,
 } from "@opentui/core";
 import balance from "@/core/balance";
+import inventoryModule from "@/core/inventory";
+import { getItemById } from "@/core/items";
 import petModule from "@/core/pet";
 import shopModule from "@/core/shop";
 import transactions from "@/core/transactions";
@@ -15,8 +17,10 @@ import {
 	type AppPage,
 	type AppSnapshot,
 	type AppViewActions,
+	type InventoryEntry,
 } from "./view";
 import streak from "@/core/streak";
+import itemEffects from "@/core/itemEffects";
 
 export class AppController {
 	private snapshot: AppSnapshot = createInitialSnapshot();
@@ -48,11 +52,20 @@ export class AppController {
 		const shop = state.user
 			? shopModule.getDailyShop(state.user.secret, state.user.id)
 			: [];
+		const inventory: InventoryEntry[] = (
+			state.user ? await inventoryModule.getUserInventory(state.user.id) : []
+		)
+			.map((row) => {
+				const item = getItemById(row.itemId);
+				return item ? { item, quantity: row.quantity } : null;
+			})
+			.filter((entry): entry is InventoryEntry => entry !== null);
 		this.snapshot = {
 			...this.snapshot,
 			coins: state.user?.coins ?? 0,
 			pet: state.pet,
 			shop,
+			inventory,
 			selectedShopIndex: Math.max(
 				0,
 				Math.min(this.snapshot.selectedShopIndex, Math.max(0, shop.length - 1)),
@@ -81,6 +94,25 @@ export class AppController {
 		};
 		this.render();
 	};
+
+	private selectInventory(index: number): void {
+		if (!this.snapshot.inventory[index]) return;
+		this.snapshot = {
+			...this.snapshot,
+			selectedInventoryIndex: index,
+			feedback: "Ready",
+		};
+		this.render();
+	}
+
+	private async useSelectedItem(): Promise<void> {
+		const entry = this.snapshot.inventory[this.snapshot.selectedInventoryIndex];
+		if (!entry) return;
+		const used = await itemEffects.useItem(entry.item.id, 1);
+		if (used) {
+			this.render();
+		}
+	}
 
 	private openBuyPrompt = () => {
 		const entry = this.snapshot.shop[this.snapshot.selectedShopIndex];
@@ -209,10 +241,29 @@ export class AppController {
 			if (key.name === "h" || key.name === "escape")
 				return this.navigate("home");
 			if (key.name === "s") return this.navigate("shop");
+			if (key.name === "i") return this.navigate("inventory");
 			if (key.name === "c") return await this.createPet();
+			if (key.name === "pageup") return this.view?.scrollPage(-1);
+			if (key.name === "pagedown") return this.view?.scrollPage(1);
+			if (this.snapshot.page === "inventory") {
+				if (key.name === "up") {
+					return this.selectInventory(
+						Math.max(0, this.snapshot.selectedInventoryIndex - 1),
+					);
+				}
+				if (key.name === "down") {
+					return this.selectInventory(
+						Math.min(
+							this.snapshot.inventory.length - 1,
+							this.snapshot.selectedInventoryIndex + 1,
+						),
+					);
+				}
+				if (key.name === "return" || key.name === "enter")
+					return await this.useSelectedItem();
+				return;
+			}
 			if (this.snapshot.page !== "shop") return;
-			if (key.name === "pageup") return this.view?.scrollShop(-1);
-			if (key.name === "pagedown") return this.view?.scrollShop(1);
 			if (key.name === "left")
 				return this.selectShop(
 					Math.max(0, this.snapshot.selectedShopIndex - 1),
