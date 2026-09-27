@@ -73,7 +73,9 @@ export class DetailsRail extends Panel {
 		this.snapshot = snapshot;
 		this.root.visible = mode === "wide";
 		const selected = snapshot.shop[snapshot.selectedShopIndex];
-		const canAfford = Boolean(selected && snapshot.coins >= selected.item.price);
+		const canAfford = Boolean(
+			selected && snapshot.coins >= selected.item.price,
+		);
 		const available = Boolean(selected && selected.stock > 0);
 		if (snapshot.page === "home") {
 			this.title.content = "Habitat";
@@ -101,11 +103,9 @@ export class DetailsRail extends Panel {
 				return;
 			}
 			const usable = isUsableItem(entry.item.id);
-			this.detail.content = `${entry.quantity}x ${entry.item.name}\n\n${entry.item.description}\n\n${usable ? "Feed it to your companion." : "A keepsake — it can't be used."}`;
+			this.detail.content = `${entry.quantity}x ${entry.item.name}\n\n${entry.item.description}\n\n${usable ? "Feed it to your companion." : "A keepsake - it can't be used."}`;
 			this.detail.fg = usable ? theme.fg : theme.muted;
-			this.action.content = usable
-				? "[ Use selected item ]"
-				: "[ No effect ]";
+			this.action.content = usable ? "[ Use selected item ]" : "[ No effect ]";
 			this.action.fg = usable ? theme.accent : theme.muted;
 			this.action.visible = true;
 			if (entry.item.art) {
