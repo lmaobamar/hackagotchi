@@ -4,8 +4,30 @@ import type { AppSnapshot, ViewportMode } from "../types";
 import { meter } from "../format";
 import { Panel } from "./panel";
 import petArt, { compactPetArt } from "@/art/petArt";
+import streak from "@/core/streak";
 
 // const PET_ART = petArt.byte.happy; // TODO: by used pet
+type Mood = "idle" | "happy" | "hungry" | "sleeping" | "sad";
+
+const STRUGGLING_THRESHOLD = 25;
+
+function getMood(
+	pet: NonNullable<AppSnapshot["pet"]>,
+	doneStreak: boolean,
+): Mood {
+	if (!pet.isAlive) return "sad";
+
+	const stats: Array<{ mood: Mood; value: number }> = [
+		{ mood: "hungry", value: pet.hunger },
+		{ mood: "sad", value: pet.happiness },
+		{ mood: "sleeping", value: pet.energy },
+	];
+
+	const worst = stats.reduce((a, b) => (b.value < a.value ? b : a));
+	if (worst.value < STRUGGLING_THRESHOLD) return worst.mood;
+
+	return doneStreak ? "happy" : "idle";
+}
 const EMPTY_HABITAT = "    .--.\n   (    )\n    `--'";
 
 export class HomePanel extends Panel {
@@ -61,7 +83,7 @@ export class HomePanel extends Panel {
 		for (const row of this.statRows) this.root.add(row);
 	}
 
-	update(snapshot: AppSnapshot, mode: ViewportMode): void {
+	async update(snapshot: AppSnapshot, mode: ViewportMode): Promise<void> {
 		const compact = mode === "compact";
 		this.habitatArea.flexGrow = compact ? 0 : 1;
 		this.habitatArea.flexShrink = compact ? 0 : 1;
@@ -76,7 +98,9 @@ export class HomePanel extends Panel {
 				? compactPetArt[style as keyof typeof compactPetArt]
 				: petArt[style];
 
-			const PET_ART = art.happy;
+			const doneStreak = await streak.hasDoneStreakToday();
+			const mood = getMood(pet, doneStreak);
+			const PET_ART = art[mood];
 			console.log(`${style} ggfrickinez`);
 			this.habitat.content = PET_ART;
 			this.petName.content = pet.name;

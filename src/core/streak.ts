@@ -25,7 +25,10 @@ function previousDate(date: string): string {
 	return localDate(value);
 }
 
-async function expireStreak(userId: number, today = localDate()): Promise<boolean> {
+async function expireStreak(
+	userId: number,
+	today = localDate(),
+): Promise<boolean> {
 	const [current] = await db
 		.select({
 			id: pet.id,
@@ -48,6 +51,16 @@ async function expireStreak(userId: number, today = localDate()): Promise<boolea
 		.where(eq(pet.id, current.id));
 
 	return true;
+}
+
+async function hasDoneStreakToday(userId: number = 1): Promise<boolean> {
+	const today = localDate();
+	const [current] = await db
+		.select({ lastStreakDate: pet.lastStreakDate })
+		.from(pet)
+		.where(eq(pet.userId, userId));
+
+	return current?.lastStreakDate === today;
 }
 
 async function recordStreak(userId: number = 1): Promise<number> {
@@ -116,4 +129,10 @@ async function updateStreak(
 	return () => clearInterval(timer);
 }
 
-export default { recordStreak, expireStreak, updateStreak, streakEvents };
+export default {
+	recordStreak,
+	expireStreak,
+	updateStreak,
+	hasDoneStreakToday,
+	streakEvents,
+};
