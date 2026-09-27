@@ -38,6 +38,8 @@ export interface AppSnapshot {
 export interface AppViewActions {
 	navigate: (page: AppPage) => void;
 	selectShop: (index: number) => void;
+	selectInventory: (index: number) => void;
+	useInventoryItem: (index: number) => void;
 	openBuyPrompt: () => void;
 	closeBuyPrompt: () => void;
 	changeBuyQuantity: (delta: number) => void;

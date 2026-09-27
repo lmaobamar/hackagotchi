@@ -30,7 +30,7 @@ export class MainPanel extends Panel {
 		});
 		this.home = new HomePanel(renderer);
 		this.shop = new ShopPanel(renderer, actions);
-		this.inventory = new InventoryPanel(renderer);
+		this.inventory = new InventoryPanel(renderer, actions);
 		this.root.add(this.heading);
 		this.root.add(this.home.root);
 		this.root.add(this.shop.root);

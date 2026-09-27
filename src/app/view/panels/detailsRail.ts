@@ -1,5 +1,6 @@
 import { BoxRenderable, TextRenderable, type CliRenderer } from "@opentui/core";
 import { theme } from "@/app/theme";
+import { isUsableItem } from "@/core/itemEffects";
 import type { AppSnapshot, AppViewActions, ViewportMode } from "../types";
 import { Panel } from "./panel";
 
@@ -42,6 +43,13 @@ export class DetailsRail extends Panel {
 			onMouseDown: () => {
 				const snapshot = this.snapshot;
 				if (!snapshot) return;
+				if (snapshot.page === "inventory") {
+					const entry = snapshot.inventory[snapshot.selectedInventoryIndex];
+					if (entry && isUsableItem(entry.item.id)) {
+						actions.useInventoryItem(snapshot.selectedInventoryIndex);
+					}
+					return;
+				}
 				const selected = snapshot.shop[snapshot.selectedShopIndex];
 				if (
 					selected &&
@@ -82,17 +90,31 @@ export class DetailsRail extends Panel {
 			return;
 		}
 		if (snapshot.page === "inventory") {
-			const total = snapshot.inventory.reduce(
-				(sum, entry) => sum + entry.quantity,
-			0,
-			);
 			this.title.content = "Inventory";
-			this.detail.content = snapshot.inventory.length
-				? `${snapshot.inventory.length} item ${snapshot.inventory.length === 1 ? "type" : "types"}\n${total} item${total === 1 ? "" : "s"} in your bag\n\nUse s to buy more supplies.`
-				: "Your bag is empty.\n\nUse s to visit Orpheus' Shop.";
-			this.detail.fg = theme.fg;
-			this.action.visible = false;
-			this.art.visible = false;
+			const entry = snapshot.inventory[snapshot.selectedInventoryIndex];
+			if (!entry) {
+				this.detail.content =
+					"Your bag is empty.\n\nUse s to visit Orpheus' Shop.";
+				this.detail.fg = theme.muted;
+				this.action.visible = false;
+				this.art.visible = false;
+				return;
+			}
+			const usable = isUsableItem(entry.item.id);
+			this.detail.content = `${entry.quantity}x ${entry.item.name}\n\n${entry.item.description}\n\n${usable ? "Feed it to your companion." : "A keepsake — it can't be used."}`;
+			this.detail.fg = usable ? theme.fg : theme.muted;
+			this.action.content = usable
+				? "[ Use selected item ]"
+				: "[ No effect ]";
+			this.action.fg = usable ? theme.accent : theme.muted;
+			this.action.visible = true;
+			if (entry.item.art) {
+				this.art.content = entry.item.art;
+				this.art.visible = true;
+			} else {
+				this.art.content = "";
+				this.art.visible = false;
+			}
 			return;
 		}
 		this.title.content = "Selected item";

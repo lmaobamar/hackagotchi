@@ -55,8 +55,8 @@ export class FooterPanel extends Panel {
 		}
 		if (snapshot.page === "inventory") {
 			this.hints.content = compact
-				? "↑↓ Scroll  Esc Home  q Quit"
-				: "PgUp/Dn Scroll  Esc Home  q Quit";
+				? "↑↓ Pick  Enter Use  Esc Home  q Quit"
+				: "↑↓ / j k Pick  Enter Use  PgUp/Dn Scroll  Esc Home  q Quit";
 			return;
 		}
 		this.hints.content =

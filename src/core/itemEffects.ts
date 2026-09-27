@@ -28,6 +28,10 @@ const EFFECTS: Record<string, (p: PetRow) => Partial<PetRow>> = {
     }),
 };
 
+export function isUsableItem(itemId: string): boolean {
+    return EFFECTS[itemId] !== undefined;
+}
+
 //RETURNS TRUE IF EFFECT WS APPLIED
 export async function applyItemEffect(
     itemId: string,
@@ -58,4 +62,4 @@ export async function useItem(
     return true;
 }
 
-export default { applyItemEffect, useItem };
+export default { applyItemEffect, useItem, isUsableItem };

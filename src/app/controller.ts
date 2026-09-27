@@ -59,7 +59,9 @@ export class AppController {
 				const item = getItemById(row.itemId);
 				return item ? { item, quantity: row.quantity } : null;
 			})
-			.filter((entry): entry is InventoryEntry => entry !== null);
+			.filter(
+				(entry): entry is InventoryEntry => entry !== null && entry.quantity > 0,
+			);
 		this.snapshot = {
 			...this.snapshot,
 			coins: state.user?.coins ?? 0,
@@ -69,6 +71,13 @@ export class AppController {
 			selectedShopIndex: Math.max(
 				0,
 				Math.min(this.snapshot.selectedShopIndex, Math.max(0, shop.length - 1)),
+			),
+			selectedInventoryIndex: Math.max(
+				0,
+				Math.min(
+					this.snapshot.selectedInventoryIndex,
+					Math.max(0, inventory.length - 1),
+				),
 			),
 		};
 		this.render();
@@ -95,7 +104,7 @@ export class AppController {
 		this.render();
 	};
 
-	private selectInventory(index: number): void {
+	private selectInventory = (index: number) => {
 		if (!this.snapshot.inventory[index]) return;
 		this.snapshot = {
 			...this.snapshot,
@@ -103,16 +112,34 @@ export class AppController {
 			feedback: "Ready",
 		};
 		this.render();
-	}
+	};
 
-	private async useSelectedItem(): Promise<void> {
-		const entry = this.snapshot.inventory[this.snapshot.selectedInventoryIndex];
+	private useItem = async (index: number) => {
+		if (this.busy || this.disposed) return;
+		const entry = this.snapshot.inventory[index];
 		if (!entry) return;
-		const used = await itemEffects.useItem(entry.item.id, 1);
-		if (used) {
-			this.render();
+		if (!itemEffects.isUsableItem(entry.item.id)) {
+			this.fail(`${entry.item.name} can't be used.`);
+			return;
 		}
-	}
+		this.busy = true;
+		try {
+			const used = await itemEffects.useItem(entry.item.id, 1);
+			if (!used) {
+				this.fail(`Unable to use ${entry.item.name}.`);
+				return;
+			}
+			this.snapshot = {
+				...this.snapshot,
+				feedback: `Used 1x ${entry.item.name}.`,
+			};
+			await this.reload();
+		} catch {
+			this.fail(`Unable to use ${entry.item.name}.`);
+		} finally {
+			this.busy = false;
+		}
+	};
 
 	private openBuyPrompt = () => {
 		const entry = this.snapshot.shop[this.snapshot.selectedShopIndex];
@@ -205,6 +232,10 @@ export class AppController {
 	private actions: AppViewActions = {
 		navigate: this.navigate,
 		selectShop: this.selectShop,
+		selectInventory: this.selectInventory,
+		useInventoryItem: (index) => {
+			void this.useItem(index);
+		},
 		openBuyPrompt: this.openBuyPrompt,
 		closeBuyPrompt: this.closeBuyPrompt,
 		changeBuyQuantity: this.changeBuyQuantity,
@@ -246,12 +277,12 @@ export class AppController {
 			if (key.name === "pageup") return this.view?.scrollPage(-1);
 			if (key.name === "pagedown") return this.view?.scrollPage(1);
 			if (this.snapshot.page === "inventory") {
-				if (key.name === "up") {
+				if (key.name === "up" || key.name === "k" || key.name === "left") {
 					return this.selectInventory(
 						Math.max(0, this.snapshot.selectedInventoryIndex - 1),
 					);
 				}
-				if (key.name === "down") {
+				if (key.name === "down" || key.name === "j" || key.name === "right") {
 					return this.selectInventory(
 						Math.min(
 							this.snapshot.inventory.length - 1,
@@ -260,7 +291,7 @@ export class AppController {
 					);
 				}
 				if (key.name === "return" || key.name === "enter")
-					return await this.useSelectedItem();
+					return await this.useItem(this.snapshot.selectedInventoryIndex);
 				return;
 			}
 			if (this.snapshot.page !== "shop") return;
