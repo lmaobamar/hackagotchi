@@ -5,7 +5,11 @@ import {
 	type CliRenderer,
 } from "@opentui/core";
 import { theme } from "@/app/theme";
-import type { AppSnapshot, AppViewActions, ViewportMode } from "../types";
+import type {
+	AppSnapshot,
+	AppViewActions,
+	ViewportMode,
+} from "@/app/view/types";
 import { Panel } from "./panel";
 import { ShopCounter } from "./shopCounter";
 import { Shopkeeper } from "./shopkeeper";
@@ -66,20 +70,32 @@ export class ShopPanel extends Panel {
 		root.add(this.summary);
 	}
 
-	update(snapshot: AppSnapshot, mode: ViewportMode, width: number, height: number): void {
-		const sceneWidth = width - (mode === "wide" ? 52 : mode === "standard" ? 23 : 1);
+	update(
+		snapshot: AppSnapshot,
+		mode: ViewportMode,
+		width: number,
+		height: number,
+	): void {
+		const sceneWidth =
+			width - (mode === "wide" ? 52 : mode === "standard" ? 23 : 1);
 		const sceneHeight = height - (mode === "compact" ? 5 : 10);
-		const tier: ShopSceneTier = sceneWidth >= 39 && sceneHeight >= 30
-			? "full"
-			: sceneHeight >= 10 ? "medium" : "tiny";
+		const tier: ShopSceneTier =
+			sceneWidth >= 39 && sceneHeight >= 30
+				? "full"
+				: sceneHeight >= 10
+					? "medium"
+					: "tiny";
 		this.scroll.visible = true;
 		this.summary.height = tier === "full" || tier === "medium" ? 2 : 1;
 		this.summary.marginTop = tier === "full" ? 1 : 0;
 		this.scene.padding = tier === "full" ? 1 : 0;
 		this.keeper.update(tier);
 		this.counter.update(snapshot, tier);
-		if (snapshot.page === "shop" && this.page === "shop" &&
-			snapshot.selectedShopIndex !== this.selectedIndex) {
+		if (
+			snapshot.page === "shop" &&
+			this.page === "shop" &&
+			snapshot.selectedShopIndex !== this.selectedIndex
+		) {
 			this.scroll.scrollChildIntoView(this.counter.root.id);
 		}
 		if (snapshot.page !== this.page || tier !== this.tier) {
@@ -93,14 +109,16 @@ export class ShopPanel extends Panel {
 			this.summary.content = "The counter is empty today.";
 			return;
 		}
-		const status = entry.stock <= 0
-			? "Sold out"
-			: snapshot.coins < entry.item.price
-				? `Need ${entry.item.price - snapshot.coins} more coins`
-				: "Enter to buy";
-		this.summary.content = tier === "full" || tier === "medium"
-			? `${entry.item.name} · ${entry.item.price} coins · ${status}\n${entry.item.description}`
-			: `${entry.stock <= 0 ? "Sold out" : snapshot.coins < entry.item.price ? `Need ${entry.item.price - snapshot.coins}c` : "Buy"} · ${entry.item.name}`;
+		const status =
+			entry.stock <= 0
+				? "Sold out"
+				: snapshot.coins < entry.item.price
+					? `Need ${entry.item.price - snapshot.coins} more coins`
+					: "Enter to buy";
+		this.summary.content =
+			tier === "full" || tier === "medium"
+				? `${entry.item.name} · ${entry.item.price} coins · ${status}\n${entry.item.description}`
+				: `${entry.stock <= 0 ? "Sold out" : snapshot.coins < entry.item.price ? `Need ${entry.item.price - snapshot.coins}c` : "Buy"} · ${entry.item.name}`;
 	}
 
 	scrollBy(direction: number): void {

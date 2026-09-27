@@ -1,7 +1,11 @@
 import { BoxRenderable, TextRenderable, type CliRenderer } from "@opentui/core";
 import { theme } from "@/app/theme";
 import { isUsableItem } from "@/core/itemEffects";
-import type { AppSnapshot, AppViewActions, ViewportMode } from "../types";
+import type {
+	AppSnapshot,
+	AppViewActions,
+	ViewportMode,
+} from "@/app/view/types";
 import { Panel } from "./panel";
 
 export class DetailsRail extends Panel {

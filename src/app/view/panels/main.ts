@@ -1,6 +1,10 @@
 import { BoxRenderable, TextRenderable, type CliRenderer } from "@opentui/core";
 import { theme } from "@/app/theme";
-import type { AppSnapshot, AppViewActions, ViewportMode } from "../types";
+import type {
+	AppSnapshot,
+	AppViewActions,
+	ViewportMode,
+} from "@/app/view/types";
 import { HomePanel } from "./home";
 import { InventoryPanel } from "./inventory";
 import { Panel } from "./panel";
@@ -37,7 +41,12 @@ export class MainPanel extends Panel {
 		this.root.add(this.inventory.root);
 	}
 
-	update(snapshot: AppSnapshot, mode: ViewportMode, width: number, height: number): void {
+	update(
+		snapshot: AppSnapshot,
+		mode: ViewportMode,
+		width: number,
+		height: number,
+	): void {
 		this.root.padding = mode === "compact" ? 0 : 1;
 		this.heading.content =
 			snapshot.page === "home"

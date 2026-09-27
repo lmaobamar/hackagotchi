@@ -1,6 +1,10 @@
 import { BoxRenderable, TextRenderable, type CliRenderer } from "@opentui/core";
 import { theme } from "@/app/theme";
-import type { AppSnapshot, AppViewActions, ViewportMode } from "../types";
+import type {
+	AppSnapshot,
+	AppViewActions,
+	ViewportMode,
+} from "@/app/view/types";
 import { Panel } from "./panel";
 
 export class BuyPromptPanel extends Panel {

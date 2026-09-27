@@ -1,7 +1,12 @@
-import { BorderChars, BoxRenderable, TextRenderable, type CliRenderer } from "@opentui/core";
+import {
+	BorderChars,
+	BoxRenderable,
+	TextRenderable,
+	type CliRenderer,
+} from "@opentui/core";
 import shopArt from "@/art/shopArt";
 import { theme } from "@/app/theme";
-import type { AppSnapshot, AppViewActions } from "../types";
+import type { AppSnapshot, AppViewActions } from "@/app/view/types";
 import { Panel } from "./panel";
 
 interface CounterSlot {
@@ -27,20 +32,26 @@ export class ShopCounter extends Panel {
 			paddingBottom: 1,
 		});
 		super(root);
-		root.add(new BoxRenderable(renderer, {
-			position: "absolute",
-			left: 1,
-			top: 1,
-			right: 0,
-			bottom: 0,
-			backgroundColor: theme.chrome,
-		}));
+		root.add(
+			new BoxRenderable(renderer, {
+				position: "absolute",
+				left: 1,
+				top: 1,
+				right: 0,
+				bottom: 0,
+				backgroundColor: theme.chrome,
+			}),
+		);
 		this.surface = new BoxRenderable(renderer, {
 			width: "100%",
 			height: 7,
 			flexShrink: 0,
 			border: true,
-			customBorderChars: { ...BorderChars.single, bottomLeft: "├", bottomRight: "┤" },
+			customBorderChars: {
+				...BorderChars.single,
+				bottomLeft: "├",
+				bottomRight: "┤",
+			},
 			borderColor: theme.counterEdge,
 			backgroundColor: theme.counter,
 			flexDirection: "row",
@@ -120,12 +131,20 @@ export class ShopCounter extends Panel {
 			const selected = index === snapshot.selectedShopIndex;
 			const inStock = Boolean(entry && entry.stock > 0);
 			slot.icon.content = entry
-				? (tier === "full" ? shopArt.byItemId : tier === "medium" ? shopArt.compactByItemId : shopArt.minimalByItemId)[entry.item.id] ?? ""
+				? ((tier === "full"
+						? shopArt.byItemId
+						: tier === "medium"
+							? shopArt.compactByItemId
+							: shopArt.minimalByItemId)[entry.item.id] ?? "")
 				: "";
 			slot.icon.width = tier === "full" ? 9 : tier === "medium" ? 5 : 1;
 			slot.icon.height = tier === "full" ? 5 : tier === "medium" ? 2 : 1;
 			slot.icon.visible = true;
-			slot.icon.fg = !inStock ? theme.muted : selected ? theme.accent : theme.yellow;
+			slot.icon.fg = !inStock
+				? theme.muted
+				: selected
+					? theme.accent
+					: theme.yellow;
 			slot.label.content = entry?.item.name ?? "";
 			slot.label.fg = selected ? theme.accent : theme.fg;
 			slot.price.content = entry

@@ -7,7 +7,11 @@ import {
 import { theme } from "@/app/theme";
 import { isUsableItem } from "@/core/itemEffects";
 import { ITEMS } from "@/core/items";
-import type { AppSnapshot, AppViewActions, ViewportMode } from "../types";
+import type {
+	AppSnapshot,
+	AppViewActions,
+	ViewportMode,
+} from "@/app/view/types";
 import { Panel } from "./panel";
 
 interface InventoryRow {

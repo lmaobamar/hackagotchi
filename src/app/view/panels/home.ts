@@ -1,8 +1,8 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: <no explanation> */
 import { BoxRenderable, TextRenderable, type CliRenderer } from "@opentui/core";
 import { theme } from "@/app/theme";
-import type { AppSnapshot, ViewportMode } from "../types";
-import { meter } from "../format";
+import type { AppSnapshot, ViewportMode } from "@/app/view/types";
+import { meter } from "@/app/view/format";
 import { Panel } from "./panel";
 import petArt, { compactPetArt } from "@/art/petArt";
 import streak from "@/core/streak";

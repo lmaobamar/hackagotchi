@@ -1,6 +1,6 @@
 import { BoxRenderable, TextRenderable, type CliRenderer } from "@opentui/core";
 import { theme } from "@/app/theme";
-import type { AppSnapshot, ViewportMode } from "../types";
+import type { AppSnapshot, ViewportMode } from "@/app/view/types";
 import { Panel } from "./panel";
 
 export class HeaderPanel extends Panel {

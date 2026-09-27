@@ -1,5 +1,5 @@
 import { BoxRenderable, type CliRenderer } from "@opentui/core";
-import { theme } from "../theme";
+import { theme } from "@/app/theme";
 import { BuyPromptPanel } from "./panels/buyPrompt";
 import { DetailsRail } from "./panels/detailsRail";
 import { FooterPanel } from "./panels/footer";

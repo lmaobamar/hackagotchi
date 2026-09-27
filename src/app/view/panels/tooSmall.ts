@@ -1,15 +1,14 @@
 import { TextRenderable, type CliRenderer } from "@opentui/core";
 import { theme } from "@/app/theme";
-import type { ViewportMode } from "../types";
-import { MIN_VIEWPORT_HEIGHT, MIN_VIEWPORT_WIDTH } from "../viewport";
+import type { ViewportMode } from "@/app/view/types";
+import { MIN_VIEWPORT_HEIGHT, MIN_VIEWPORT_WIDTH } from "@/app/view/viewport";
 import { Panel } from "./panel";
 
 export class TooSmallPanel extends Panel {
 	constructor(renderer: CliRenderer) {
 		super(
 			new TextRenderable(renderer, {
-				content:
-					`Hackagotchi needs at least ${MIN_VIEWPORT_WIDTH} x ${MIN_VIEWPORT_HEIGHT}\nResize to continue, or press q to quit.`,
+				content: `Hackagotchi needs at least ${MIN_VIEWPORT_WIDTH} x ${MIN_VIEWPORT_HEIGHT}\nResize to continue, or press q to quit.`,
 				fg: theme.muted,
 				width: "100%",
 				height: "100%",
