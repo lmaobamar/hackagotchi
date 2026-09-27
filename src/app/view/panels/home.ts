@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: <no explanation> */
 import { BoxRenderable, TextRenderable, type CliRenderer } from "@opentui/core";
 import { theme } from "@/app/theme";
 import type { AppSnapshot, ViewportMode } from "../types";
@@ -6,7 +7,6 @@ import { Panel } from "./panel";
 import petArt, { compactPetArt } from "@/art/petArt";
 import streak from "@/core/streak";
 
-// const PET_ART = petArt.byte.happy; // TODO: by used pet
 type Mood = "idle" | "happy" | "hungry" | "sleeping" | "sad";
 
 const STRUGGLING_THRESHOLD = 25;
