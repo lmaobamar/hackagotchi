@@ -32,6 +32,10 @@ export class AppController {
 		await this.reload();
 		this.view = new AppView(this.renderer, this.actions, this.snapshot);
 		this.renderer.keyInput.on("keypress", this.handleKey);
+		streak.streakEvents.on("plsredraw", async () => {
+			console.log("plsredraw");
+			await this.reload();
+		});
 		this.renderer.once(CliRenderEvents.DESTROY, this.dispose);
 	}
 
@@ -39,7 +43,7 @@ export class AppController {
 		if (!this.disposed) this.view?.update(this.snapshot);
 	};
 
-	private reload = async () => {
+	async reload() {
 		const state = await getAppInitState();
 		const shop = state.user
 			? shopModule.getDailyShop(state.user.secret, state.user.id)
@@ -56,7 +60,7 @@ export class AppController {
 		};
 		this.render();
 		return state;
-	};
+	}
 
 	private fail = (message: string) => {
 		this.snapshot = { ...this.snapshot, feedback: message };

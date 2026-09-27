@@ -2,14 +2,11 @@ import { db } from "@/db";
 import { getAppInitState, type AppInitState } from "@/db/init";
 import { pet } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import petModule from "@/core/pet";
-import streak from "./streak";
 
 export async function processDecay() {
 	const state: AppInitState = await getAppInitState();
 	const user = state.user;
 	const currentPet = state.pet;
-	if (currentPet) await streak.updateStreak(currentPet.userId);
 	if (!user || !user.lastLaunchedApp || !currentPet) return;
 
 	const lastLaunchTime = user.lastLaunchedApp
