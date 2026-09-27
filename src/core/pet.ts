@@ -27,10 +27,6 @@ async function createPet(name: string): Promise<void> {
 		.onConflictDoNothing();
 }
 
-function localDate(d: Date = new Date()): string {
-	return d.toLocaleDateString("en-CA");
-}
-
 async function renamePet(name: string, userId: number = 1): Promise<void> {
 	const clean = name.trim().slice(0, 20);
 	if (!clean) return;
