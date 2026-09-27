@@ -1,15 +1,12 @@
-# hackagotchi
+# Hackagotchi
 
-To install dependencies:
+for Hack Club Third Space. it's a Tamagotchi in your terminal!
 
-```bash
-bun install
-```
+# Running (Debug)
 
-To run:
+You'll need [Bun](https://bun.com). Install dependencies with `bun i`, then do `bun .`
 
-```bash
-bun .
-```
+# Compiling
 
-This project was created using `bun init` in bun v1.4.2. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+Same as running in Debug, but instead of running `bun .`, you'll have to run `bun compile`.\
+Then `./dist/hackagotchi` will be the executable. Add `.exe` on the end for Windows.
